@@ -1,0 +1,62 @@
+cff-version: 1.2.0
+message: "If you use CD-LAM, please cite the manuscript and this software release."
+title: "Causally Debiased Latent Action Model for Embodied Action Conditioned World Models"
+type: software
+license: Apache-2.0
+repository-code: "https://github.com/yufanwei/CD-LAM"
+repository-artifact: "https://huggingface.co/yufanwei/CD-LAM"
+url: "https://yufanwei.github.io/CD-LAM-project-page/"
+authors:
+  - given-names: Yufan
+    family-names: Wei
+  - given-names: Kun
+    family-names: Zhou
+  - given-names: Lingjun
+    family-names: Mao
+  - given-names: Zijun
+    family-names: Zhang
+  - given-names: Ziming
+    family-names: Xu
+  - given-names: Ziqiao
+    family-names: Xi
+  - given-names: Shuang
+    family-names: Liang
+  - given-names: Ruobing
+    family-names: Han
+  - given-names: Yuchen
+    family-names: Yan
+  - given-names: Xinyue
+    family-names: Wang
+  - given-names: Fan
+    family-names: Feng
+  - given-names: Biwei
+    family-names: Huang
+preferred-citation:
+  type: article
+  title: "Causally Debiased Latent Action Model for Embodied Action Conditioned World Models"
+  year: 2026
+  authors:
+    - given-names: Yufan
+      family-names: Wei
+    - given-names: Kun
+      family-names: Zhou
+    - given-names: Lingjun
+      family-names: Mao
+    - given-names: Zijun
+      family-names: Zhang
+    - given-names: Ziming
+      family-names: Xu
+    - given-names: Ziqiao
+      family-names: Xi
+    - given-names: Shuang
+      family-names: Liang
+    - given-names: Ruobing
+      family-names: Han
+    - given-names: Yuchen
+      family-names: Yan
+    - given-names: Xinyue
+      family-names: Wang
+    - given-names: Fan
+      family-names: Feng
+    - given-names: Biwei
+      family-names: Huang

@@ -1,0 +1,42 @@
+diff --git a/cowtracker/layers/video_transformer.py b/cowtracker/layers/video_transformer.py
+index 08be8c4..9c57b03 100644
+--- a/cowtracker/layers/video_transformer.py
++++ b/cowtracker/layers/video_transformer.py
+@@ -58,17 +58,18 @@ def _get_flash_attention_ops():
+     # Get compute capability of current device
+     major, _ = torch.cuda.get_device_capability()
+     # print("compute capability: ", torch.cuda.get_device_capability())
+-    # H100 has compute capability 9.0
++    # H100 has compute capability 9.0, but xformers may not include FA3.
++    # Probe availability and fall back to FA2 when needed.
+     if major >= 9:
+-        # Use Flash Attention 3 for H100 and newer
+         try:
+-            return (xops.fmha.flash3.FwOp, xops.fmha.flash3.BwOp)
+-        except AttributeError:
+-            # Fall back to flash2 if flash3 not available
+-            print("Flash Attention 3 not available, falling back to Flash Attention 2")
+-            return (xops.fmha.flash.FwOp, xops.fmha.flash.BwOp)
++            fa3 = (xops.fmha.flash3.FwOp, xops.fmha.flash3.BwOp)
++            if fa3[0].is_available():
++                return fa3
++        except (AttributeError, Exception):
++            pass
++        print("Flash Attention 3 not built into this xformers; falling back to Flash Attention 2")
++        return (xops.fmha.flash.FwOp, xops.fmha.flash.BwOp)
+     else:
+-        # Use Flash Attention 2 for older GPUs
+         return (xops.fmha.flash.FwOp, xops.fmha.flash.BwOp)
+
+
+@@ -100,8 +101,9 @@ class FlashAttention3(nn.Module):
+         self.flash_ops = _get_flash_attention_ops()
+
+     def forward(
+-        self, x: torch.Tensor, attn_mask: torch.Tensor | None = None
++        self, x: torch.Tensor, attn_mask: torch.Tensor | None = None, **kwargs
+     ) -> torch.Tensor:
++        # Newer timm versions may pass is_causal and related keyword arguments.
+         B, N, C = x.shape
+
+         # Compute Q, K, V

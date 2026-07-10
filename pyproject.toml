@@ -1,0 +1,58 @@
+[build-system]
+requires = ["setuptools>=77", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cd-lam"
+version = "0.1.0"
+description = "Causally debiased latent actions for embodied action-conditioned world models"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "Apache-2.0"
+authors = [
+  {name = "Yufan Wei"},
+  {name = "CD-LAM Authors"},
+]
+keywords = [
+  "latent action model",
+  "world model",
+  "embodied ai",
+  "causal representation learning",
+]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Science/Research",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [
+  "numpy>=1.24,<3",
+  "PyYAML>=6,<7",
+  "torch>=2.1",
+]
+
+[project.scripts]
+cdlam = "cd_lam.__main__:main"
+
+[project.optional-dependencies]
+test = [
+  "build>=1.2,<2",
+  "pytest>=8,<9",
+  "ruff==0.13.2",
+]
+download = ["huggingface-hub>=0.36,<1"]
+
+[project.urls]
+Homepage = "https://yufanwei.github.io/CD-LAM-project-page/"
+Repository = "https://github.com/yufanwei/CD-LAM"
+Models = "https://huggingface.co/yufanwei/CD-LAM"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"

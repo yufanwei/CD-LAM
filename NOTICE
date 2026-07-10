@@ -1,0 +1,21 @@
+CD-LAM
+Copyright 2026 CD-LAM contributors
+
+This product includes software developed for the manuscript
+"Causally Debiased Latent Action Model for Embodied Action Conditioned World
+Models."
+
+The source repository is licensed under Apache License 2.0. The license does
+not grant rights to separately obtained datasets, base models, checkpoints, or
+third-party dependencies.
+
+In particular, the ACWM base implementation, SAM3, CoWTracker, their model
+weights, and their transitive dependencies are not vendored. They retain their
+respective copyright notices, licenses, acceptable-use terms, and access
+requirements. CoWTracker is identified upstream as noncommercial research
+software. Review third_party/dependencies.lock.json and each upstream license
+before fetching or using an optional dependency.
+
+DreamDojo appears in result fixtures as the scientifically attributed baseline
+and in the external dependency lock as an upstream ACWM implementation. It is
+not the name or runtime namespace of this package.

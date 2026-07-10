@@ -1,0 +1,246 @@
+{
+  "schema_version": 1,
+  "paper": {
+    "title": "Causally Debiased Latent Action Model for Embodied Action Conditioned World Models",
+    "code_url": "https://github.com/yufanwei/CD-LAM",
+    "project_url": "https://yufanwei.github.io/CD-LAM-project-page/",
+    "model_url": "https://huggingface.co/yufanwei/CD-LAM"
+  },
+  "status": {
+    "provenance": "values transcribed from manuscript Tables I-V",
+    "recomputed_by_this_release": false,
+    "checkpoints_available": false,
+    "note": "Public checkpoints and Hugging Face assets are pending upload; these fixtures are reference values, not fresh evaluation output."
+  },
+  "reporting_conventions": {
+    "fdce": {
+      "name": "Foreground Displacement Chamfer Error",
+      "unit": "pixels at evaluation resolution",
+      "direction": "lower_is_better",
+      "max_valid_foreground_anchors_per_rollout_pair": 16,
+      "foreground_backend": "SAM3",
+      "tracking_backend": "CoWTracker",
+      "track_distance": "c_ij = (1/H) * sum_s ||(p_hat_i^s - p_hat_i^0) - (p_j^s - p_j^0)||_2",
+      "symmetric_chamfer": "FDCE = (1/(2*N_g))*sum_i min_j c_ij + (1/(2*N_r))*sum_j min_i c_ij"
+    },
+    "psnr": {
+      "unit": "dB",
+      "direction": "higher_is_better"
+    },
+    "ssim": {
+      "direction": "higher_is_better"
+    },
+    "lpips": {
+      "direction": "lower_is_better"
+    }
+  },
+  "tables": {
+    "table_i": {
+      "title": "LAM action-irrelevant confounding audit",
+      "protocol": {
+        "unit_under_test": "LAM encoder alone",
+        "world_model_rollout": false,
+        "direction": "lower_is_better_for_all_rows",
+        "shortcut_leakage_definition": "different-action same-episode distance gap relative to same-action different-episode pairs"
+      },
+      "rows": [
+        {
+          "group": "zero_transition_response",
+          "diagnostic": "static duplicated-frame pair relative response",
+          "statistic": "median",
+          "unit": "relative_norm",
+          "dreamdojo_lam": 0.527,
+          "cd_lam": 0.043
+        },
+        {
+          "group": "zero_transition_response",
+          "diagnostic": "absolute latent norm",
+          "statistic": "median",
+          "unit": "latent_norm",
+          "dreamdojo_lam": 3.119,
+          "cd_lam": 0.226
+        },
+        {
+          "group": "camera_shift_robustness",
+          "diagnostic": "horizontal synthetic translation",
+          "statistic": "mean",
+          "unit": "relative_norm",
+          "dreamdojo_lam": 0.555,
+          "cd_lam": 0.156
+        },
+        {
+          "group": "camera_shift_robustness",
+          "diagnostic": "horizontal synthetic translation",
+          "statistic": "median",
+          "unit": "relative_norm",
+          "dreamdojo_lam": 0.536,
+          "cd_lam": 0.096
+        },
+        {
+          "group": "camera_shift_robustness",
+          "diagnostic": "vertical synthetic translation",
+          "statistic": "mean",
+          "unit": "relative_norm",
+          "dreamdojo_lam": 0.545,
+          "cd_lam": 0.11
+        },
+        {
+          "group": "camera_shift_robustness",
+          "diagnostic": "vertical synthetic translation",
+          "statistic": "median",
+          "unit": "relative_norm",
+          "dreamdojo_lam": 0.529,
+          "cd_lam": 0.064
+        },
+        {
+          "group": "action_neighbor_structure",
+          "diagnostic": "shortcut leakage",
+          "statistic": "point_estimate",
+          "unit": "distance_gap",
+          "dreamdojo_lam": 0.151,
+          "cd_lam": 0.014
+        }
+      ],
+      "preservation_check": {
+        "diagnostic": "same-primitive cross-episode cosine similarity",
+        "dreamdojo_lam": 0.132,
+        "cd_lam": 0.131,
+        "source": "manuscript text accompanying Table I"
+      }
+    },
+    "table_ii": {
+      "title": "Latent action conditioned rollouts after ACWM debiased fine-tuning",
+      "protocol": {
+        "stage": 2,
+        "dataset": "EgoDex",
+        "held_out_clips": 300,
+        "own_latent_action": "z_t extracted from the evaluated video transition",
+        "target_transfer": "do(z_t = z_t^tar) under fixed source context",
+        "transfer_note": "Right-block pixel differences are marginal; FDCE is the operative transfer comparison."
+      },
+      "rows": [
+        {
+          "backbone": "2B",
+          "model": "DreamDojo",
+          "own_latent_rollout": {"fdce": 34.0, "psnr": 20.88, "ssim": 0.78, "lpips": 0.413},
+          "target_latent_transfer": {"psnr": 13.02, "ssim": 0.598, "lpips": 0.643, "fdce": 42.74}
+        },
+        {
+          "backbone": "2B",
+          "model": "CD-LAM",
+          "own_latent_rollout": {"fdce": 19.63, "psnr": 24.29, "ssim": 0.827, "lpips": 0.308},
+          "target_latent_transfer": {"psnr": 13.15, "ssim": 0.588, "lpips": 0.6, "fdce": 33.81}
+        },
+        {
+          "backbone": "14B",
+          "model": "DreamDojo",
+          "own_latent_rollout": {"fdce": 40.29, "psnr": 21.04, "ssim": 0.792, "lpips": 0.398},
+          "target_latent_transfer": {"psnr": 13.11, "ssim": 0.593, "lpips": 0.631, "fdce": 50.27}
+        },
+        {
+          "backbone": "14B",
+          "model": "CD-LAM",
+          "own_latent_rollout": {"fdce": 29.87, "psnr": 23.18, "ssim": 0.814, "lpips": 0.342},
+          "target_latent_transfer": {"psnr": 13.03, "ssim": 0.597, "lpips": 0.617, "fdce": 33.22}
+        }
+      ]
+    },
+    "table_iii": {
+      "title": "ACWM results after robot action based training and direct interventions",
+      "protocol": {
+        "stage": 3,
+        "dataset": "AgiBot",
+        "clips": 300,
+        "episode_sampling": "distinct episodes",
+        "normal_rollout": "recorded robot action u_t",
+        "zero_action": "do(u_t = 0), scored against a static reference formed by holding the initial frame fixed",
+        "zero_action_comparability": "not comparable with normal-rollout or target-transfer FDCE",
+        "target_transfer": "do(u_t = u_t^tar) under fixed source context"
+      },
+      "rows": [
+        {
+          "backbone": "2B",
+          "model": "DreamDojo",
+          "robot_action_rollout": {"fdce_mean": 12.63, "fdce_median": 8.15, "psnr": 19.85, "ssim": 0.798, "lpips": 0.271},
+          "zero_action_fdce": 10.71,
+          "target_action_transfer_fdce": 24.36
+        },
+        {
+          "backbone": "2B",
+          "model": "CD-LAM",
+          "robot_action_rollout": {"fdce_mean": 8.24, "fdce_median": 6.75, "psnr": 20.6, "ssim": 0.806, "lpips": 0.269},
+          "zero_action_fdce": 5.03,
+          "target_action_transfer_fdce": 22.55
+        },
+        {
+          "backbone": "14B",
+          "model": "DreamDojo",
+          "robot_action_rollout": {"fdce_mean": 11.11, "fdce_median": 8.98, "psnr": 20.01, "ssim": 0.808, "lpips": 0.263},
+          "zero_action_fdce": 9.36,
+          "target_action_transfer_fdce": 24.82
+        },
+        {
+          "backbone": "14B",
+          "model": "CD-LAM",
+          "robot_action_rollout": {"fdce_mean": 7.73, "fdce_median": 5.99, "psnr": 21.01, "ssim": 0.818, "lpips": 0.247},
+          "zero_action_fdce": 2.18,
+          "target_action_transfer_fdce": 21.11
+        }
+      ]
+    },
+    "table_iv": {
+      "title": "Scaling of the debiasing data",
+      "protocol": {
+        "backbone": "2B",
+        "stage1_optimizer_steps_for_every_cd_lam_tier": 1000,
+        "stage3_protocol": "same aligned robot action based training for every tier",
+        "purpose": "isolate Stage-1 data quantity at fixed Stage-1 compute"
+      },
+      "rows": [
+        {"model": "DreamDojo", "debiasing_hours": null, "psnr": 19.85, "fdce_mean": 12.63, "fdce_median": 8.15},
+        {"model": "CD-LAM", "debiasing_hours": 1, "psnr": 20.54, "fdce_mean": 8.91, "fdce_median": 6.88},
+        {"model": "CD-LAM", "debiasing_hours": 10, "psnr": 20.61, "fdce_mean": 8.87, "fdce_median": 6.23},
+        {"model": "CD-LAM", "debiasing_hours": 100, "psnr": 20.6, "fdce_mean": 8.24, "fdce_median": 6.75},
+        {"model": "CD-LAM", "debiasing_hours": 1000, "psnr": 20.64, "fdce_mean": 7.97, "fdce_median": 6.12}
+      ]
+    },
+    "table_v": {
+      "title": "Objective ablation of CD-LAM",
+      "protocol": {
+        "comparability": "all columns use a separate ablation evaluation setup and are comparable only within Table V",
+        "psnr_and_fg_psnr": "latent-action-conditioned ACWM rollouts after Stage 2, not LAM decoder reconstruction",
+        "camera_shift": "LAM relative latent response to horizontal and vertical synthetic shifts",
+        "fdce": "robot-action rollouts after Stage 3; absolute values are not comparable with Table III"
+      },
+      "rows": [
+        {"objective": "Full CD-LAM", "psnr": 29.64, "fg_psnr": 26.57, "camera_shift_x": 0.133, "camera_shift_y": 0.101, "robot_action_fdce": 17.23},
+        {"objective": "without embodiment-centric weighting", "psnr": 29.53, "fg_psnr": 26.26, "camera_shift_x": 0.134, "camera_shift_y": 0.1, "robot_action_fdce": 18.4},
+        {"objective": "without action-centric contrast", "psnr": 29.64, "fg_psnr": 26.57, "camera_shift_x": 0.134, "camera_shift_y": 0.101, "robot_action_fdce": 19.07},
+        {"objective": "without zero-transition calibration", "psnr": 29.31, "fg_psnr": 26.48, "camera_shift_x": 0.637, "camera_shift_y": 0.637, "robot_action_fdce": 16.1, "footnote": "Although FDCE is lower on this split, the upstream camera-shift diagnostic fails; the manuscript does not interpret this as better action debiasing."}
+      ]
+    }
+  },
+  "paper_highlights": {
+    "stage1": [
+      "Median zero-transition relative response changes from 0.527 to 0.043.",
+      "Synthetic camera-shift responses are 3.6x to 8.3x smaller, depending on axis and aggregation.",
+      "Shortcut leakage changes from 0.151 to 0.014 while the cross-episode same-primitive cosine preservation check remains 0.132 versus 0.131."
+    ],
+    "stage2": [
+      "Own-latent rollout FDCE is reduced by 42% at 2B and 26% at 14B after rounding as reported in the manuscript.",
+      "Target-latent-transfer FDCE is reduced by 21% at 2B and 34% at 14B after rounding."
+    ],
+    "stage3": [
+      "Robot-action rollout FDCE mean is reduced by 35% at 2B and 30% at 14B after rounding.",
+      "The 14B CD-LAM row improves on the 2B CD-LAM row in every Table-III column."
+    ],
+    "efficiency": {
+      "baseline_reference_updates": 50000,
+      "cd_lam_14b_reaches_reference_fdce_at_approximately": 3000,
+      "cd_lam_14b_reaches_reference_psnr_at_approximately": 4000,
+      "claim": "more than 12x fewer aligned robot-action adaptation optimizer updates to reach the reference",
+      "qualification": "This is a metric-threshold update comparison under aligned data, batch size, and optimizer settings. It is not a wall-clock speedup and does not compare the final 6000-update checkpoint ratio."
+    },
+    "scope_warning": "The manuscript reports video fidelity and action-following metrics, not planning, policy, safety, or real-robot task-success results."
+  }
+}

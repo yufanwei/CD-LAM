@@ -1,0 +1,38 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Local environments and caches
+.venv/
+.deps/
+.cache/
+.hf/
+
+# User configuration
+configs/runtime.env
+configs/runtime.local.*
+
+# Model, data, and generated artifacts
+artifacts/
+checkpoints/
+/data/
+outputs/
+*.ckpt
+*.pt
+*.pth
+*.safetensors
+*.npz
+*.parquet
+*.mp4
+
+# Editors and OS files
+.idea/
+.vscode/
+.DS_Store
