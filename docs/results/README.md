@@ -5,8 +5,9 @@ from manuscript Tables I–V together with protocol and comparability metadata.
 
 These values are reference fixtures for documentation and validation. They are
 not recomputed by this source checkout, and they must not be presented as a
-fresh run. Public checkpoints and Hugging Face assets are pending upload, so
-full metric reproduction is currently gated.
+fresh run. The released 2B research checkpoints are not asserted to reproduce
+every headline table; full metric reproduction also requires the original
+evaluation data and pinned metric dependencies.
 
 Validate the JSON schema and paper-table invariants with:
 

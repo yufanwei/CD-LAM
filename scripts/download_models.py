@@ -13,6 +13,7 @@ from typing import Any, Sequence
 
 
 ASSET_MANIFEST = "asset_manifest.json"
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
 _HEX40 = re.compile(r"[0-9a-f]{40}")
 _HEX64 = re.compile(r"[0-9a-f]{64}")
 _ASSET_STRING_FIELDS = (
@@ -33,7 +34,9 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--repo-id", default="yufanwei/CD-LAM")
     parser.add_argument("--revision", default="main")
-    parser.add_argument("--local-dir", type=Path, default=Path("artifacts"))
+    parser.add_argument(
+        "--local-dir", type=Path, default=PROJECT_ROOT / "artifacts"
+    )
     parser.add_argument(
         "--allow-pattern",
         action="append",

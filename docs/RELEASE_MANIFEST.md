@@ -6,36 +6,20 @@ weights.
 
 ```text
 CD-LAM/
-├── README.md
-├── Makefile
-├── MODEL_CARD.md
-├── CITATION.cff
-├── CONTRIBUTING.md
-├── LICENSE
-├── NOTICE
-├── pyproject.toml
-├── configs/
-│   ├── paths.example.env
-│   ├── pipeline_100h_2b.yaml
-│   ├── pipeline_100h_14b.yaml
-│   └── eval_paper.yaml
-├── docs/
-│   ├── ARTIFACTS.md
-│   ├── CHECKPOINTS.md
-│   ├── DATA.md
-│   ├── EVAL_PROTOCOL.md
-│   ├── PIPELINE.md
-│   ├── TRAINING.md
-│   ├── TRAINING_CORRECTNESS.md
-│   └── USAGE.md
-├── examples/
-├── results/
-│   ├── README.md
-│   └── paper_results.json
+├── .github/        CI and contributing guide
+├── configs/        portable pipeline and evaluation templates
+├── docs/           method docs, model card, examples, and paper fixtures
 ├── scripts/
 ├── src/
-├── tests/
-└── third_party/
+├── tests/          tests plus fixtures/ portable test-set metadata
+├── third_party/
+├── README.md
+├── LICENSE
+├── NOTICE
+├── CITATION.cff
+├── Makefile
+├── pyproject.toml
+└── requirements.lock
 ```
 
 ## Included
@@ -58,6 +42,8 @@ CD-LAM/
 - Private experiment reports, raw rollout videos, caches, or machine-specific
   launch settings.
 
-The [Hugging Face repository](https://huggingface.co/yufanwei/CD-LAM) is the
-declared home for large release assets, but those assets are pending upload.
-No checkpoint filename or checksum should be inferred from this manifest.
+The [Hugging Face repository](https://huggingface.co/yufanwei/CD-LAM) contains
+the released 2B research checkpoint lineages. Its machine-readable
+`asset_manifest.json` is authoritative for filenames, tensor roles, sizes,
+SHA-256 values, and compatibility metadata. The source-tree manifest does not
+duplicate that mutable asset index.

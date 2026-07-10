@@ -2,22 +2,25 @@
 
 ## Availability
 
-Public CD-LAM checkpoints and associated Hugging Face assets are **pending
-upload** at <https://huggingface.co/yufanwei/CD-LAM>. This source release does
-not contain trained model files, and it does not declare checkpoint filenames
-or checksums before the uploads exist.
+Tensor-exact 2B research checkpoints are published at
+<https://huggingface.co/yufanwei/CD-LAM>. This source release does not contain
+the large model files. The model repository's `asset_manifest.json` declares
+the authoritative filenames, roles, formats, byte sizes, SHA-256 values,
+lineages, and compatibility metadata.
 
 Consequently:
 
 - unit tests and synthetic smoke tests are available now;
 - configuration and asset validation are available now;
-- full Stage-1/2/3 training and paper-metric reproduction require user-supplied
-  compatible backbones, data, and/or the pending release assets;
+- the released ACWM files are overlays and require their compatible external
+  2B base model, production adapter, and data;
+- 14B execution and exact paper-metric reproduction require additional
+  user-supplied or unreleased compatible assets;
 - a random or similarly named checkpoint must never be substituted silently.
 
-When assets are published, a versioned manifest should record for every file:
-role, model scale, training stage, data tier, optimizer update, tensor format,
-byte size, SHA-256, license/access terms, and the exact code revision.
+The published manifest records for every file: role, model scale, training
+stage, data tier, optimizer update, tensor format, byte size, SHA-256,
+license/access terms, and source-code provenance.
 
 ## Logical checkpoint roles
 
@@ -62,12 +65,12 @@ Loaders must validate finite statistics, nonzero standard deviations,
 `action_mean`, `action_std`, `zm`, and `zsd` are incomplete and should be
 rejected.
 
-Before public distribution, a bridge manifest should additionally record the
-robot/dataset identity, ordered action components, units, coordinate frames,
-`action_representation=stride_delta`, source stride, upstream normalization
-convention, preprocessing revision, and matching LAM checkpoint hash. These
-semantic fields are required for safe reuse even when older research bundles
-do not contain them.
+The published `action_contract.json` and bridge sidecars record the embodiment,
+ordered action components, loader and bridge representations, source stride,
+normalization-metadata hashes, and matching LAM checkpoint hash. Units and
+coordinate frames remain inherited from the cited AgiBot modality metadata;
+a production adapter must verify them explicitly rather than infer them from
+shape or filename.
 
 ## Local routing
 

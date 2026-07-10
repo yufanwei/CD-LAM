@@ -18,6 +18,7 @@ SKIP_DIRS = {
     ".deps",
     ".venv",
     ".pytest_cache",
+    ".ruff_cache",
     "__pycache__",
     "build",
     "dist",
@@ -36,6 +37,24 @@ FORBIDDEN = {
     "credential material": re.compile(
         r"(?:hf_[A-Za-z0-9]{20,}|ghp_[A-Za-z0-9]{20,}|AKIA[0-9A-Z]{16}|BEGIN (?:RSA |OPENSSH )?PRIVATE KEY)"
     ),
+}
+ALLOWED_TOP_LEVEL = {
+    ".gitattributes",
+    ".github",
+    ".gitignore",
+    "CITATION.cff",
+    "LICENSE",
+    "Makefile",
+    "NOTICE",
+    "README.md",
+    "configs",
+    "docs",
+    "pyproject.toml",
+    "requirements.lock",
+    "scripts",
+    "src",
+    "tests",
+    "third_party",
 }
 
 
@@ -105,6 +124,16 @@ def main() -> int:
     cjk_hits = 0
     files = tracked_files()
 
+    unexpected_top_level = sorted(
+        {
+            path.relative_to(ROOT).parts[0]
+            for path in files
+            if path.relative_to(ROOT).parts[0] not in ALLOWED_TOP_LEVEL
+        }
+    )
+    for item in unexpected_top_level:
+        errors.append(f"unexpected top-level release item: {item}")
+
     for path in files:
         rel = path.relative_to(ROOT)
         if path.is_symlink():
@@ -128,7 +157,7 @@ def main() -> int:
                 cjk_hits += 1
                 errors.append(f"CJK text is not release-safe: {rel}:{line_number}")
         # This file intentionally contains the patterns it enforces.
-        if rel == Path("tools/release_check.py"):
+        if rel == Path("scripts/release_check.py"):
             continue
         for label, pattern in FORBIDDEN.items():
             if pattern.search(text):
@@ -164,9 +193,10 @@ def main() -> int:
 
     required = [
         "README.md", "LICENSE", "NOTICE", "CITATION.cff", "pyproject.toml",
-        "docs/TRAINING_CORRECTNESS.md", "src/cd_lam/__init__.py", "tests",
-        "test_data/episodes.jsonl", "third_party/dependencies.lock.json",
-        "tools/check_wheel.py",
+        ".github/CONTRIBUTING.md", "docs/MODEL_CARD.md",
+        "docs/RELEASE_MANIFEST.md", "docs/TRAINING_CORRECTNESS.md",
+        "src/cd_lam/__init__.py", "tests", "tests/fixtures/episodes.jsonl",
+        "third_party/dependencies.lock.json", "scripts/check_wheel.py",
     ]
     for item in required:
         if not (ROOT / item).exists():
@@ -205,7 +235,7 @@ def main() -> int:
             "python -m cd_lam data-prepare",
             "python -m cd_lam train-smoke",
             "python -m build --wheel",
-            "python tools/check_wheel.py",
+            "python scripts/check_wheel.py",
         )
         for command in required_ci_commands:
             if command not in ci_text:

@@ -7,14 +7,14 @@ external LAM/ACWM adapter remains responsible for media decoding.
 
 ```bash
 bash scripts/run.sh data-prepare \
-  --input test_data/episodes.jsonl \
+  --input tests/fixtures/episodes.jsonl \
   --output outputs/test-data
 bash scripts/run.sh data-validate --root outputs/test-data
 ```
 
 Production episode JSONL may provide one explicit 22D absolute `actions` row
-per source frame. The compact `action_sequence` form in `test_data` is only a
-deterministic fixture generator. The command produces Stage-1 pairs, Stage-2
+per source frame. The compact `action_sequence` form in `tests/fixtures` is
+only a deterministic fixture generator. The command produces Stage-1 pairs, Stage-2
 windows, bridge pairs, and Stage-3 windows with aligned transition indices.
 
 ## Rules shared by every stage

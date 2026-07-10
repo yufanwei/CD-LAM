@@ -112,5 +112,6 @@ the commanded foreground motion was followed.
 Heavy hand-object occlusion, motion blur, textureless grippers, segmentation
 errors, and tracker drift can inflate FDCE. Evaluation should record dependency
 versions, mask/track validity counts, image resolution, seed, and aggregation
-logic. Exact paper reproduction additionally requires the still-pending release
-checkpoints and the original evaluation assets.
+logic. Exact paper reproduction additionally requires a checkpoint explicitly
+verified for the corresponding table and the original evaluation assets. The
+released 2B research files do not by themselves satisfy that requirement.

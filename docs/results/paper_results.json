@@ -9,8 +9,10 @@
   "status": {
     "provenance": "values transcribed from manuscript Tables I-V",
     "recomputed_by_this_release": false,
-    "checkpoints_available": false,
-    "note": "Public checkpoints and Hugging Face assets are pending upload; these fixtures are reference values, not fresh evaluation output."
+    "research_checkpoints_available": true,
+    "released_model_scales": ["2B"],
+    "headline_table_checkpoint_verified": false,
+    "note": "Released 2B research checkpoints are not asserted to reproduce every headline table; these fixtures are manuscript reference values, not fresh evaluation output."
   },
   "reporting_conventions": {
     "fdce": {

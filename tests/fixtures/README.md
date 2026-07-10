@@ -10,7 +10,7 @@ per source frame. Run:
 
 ```bash
 bash scripts/run.sh data-prepare \
-  --input test_data/episodes.jsonl \
+  --input tests/fixtures/episodes.jsonl \
   --output outputs/test-data
 bash scripts/run.sh data-validate --root outputs/test-data
 ```

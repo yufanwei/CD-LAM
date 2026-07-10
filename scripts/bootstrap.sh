@@ -13,7 +13,8 @@ Usage: bash scripts/bootstrap.sh [--with-metrics] [--with-models]
 
 Creates a local environment, installs CD-LAM, and runs the deterministic
 smoke suite. Optional metric backends have separate licenses and are fetched
-only when --with-metrics is requested.
+only when --with-metrics is requested. --with-models downloads the complete
+public model snapshot (about 23 GB) after the source gates pass.
 EOF
 }
 
@@ -71,19 +72,20 @@ if [[ "$WITH_METRICS" == 1 ]]; then
   bash "$ROOT/scripts/fetch_optional_deps.sh" metrics
 fi
 
-if [[ "$WITH_MODELS" == 1 ]]; then
-  "$VENV/bin/python" "$ROOT/scripts/download_models.py"
-fi
-
-"$VENV/bin/python" "$ROOT/tools/release_check.py" --strict
+"$VENV/bin/python" "$ROOT/scripts/release_check.py" --strict
 "$VENV/bin/python" -m pytest -q "$ROOT/tests"
 "$VENV/bin/python" -m cd_lam smoke
 "$VENV/bin/python" -m cd_lam data-prepare \
-  --input "$ROOT/test_data/episodes.jsonl" \
+  --input "$ROOT/tests/fixtures/episodes.jsonl" \
   --output "$VENV/test-data"
 "$VENV/bin/python" -m cd_lam data-validate --root "$VENV/test-data"
 "$VENV/bin/python" -m cd_lam train-smoke \
   --output-root "$VENV/train-smoke" --steps 1
+
+if [[ "$WITH_MODELS" == 1 ]]; then
+  "$VENV/bin/python" "$ROOT/scripts/download_models.py" \
+    --local-dir "$ROOT/artifacts"
+fi
 
 cat <<EOF
 

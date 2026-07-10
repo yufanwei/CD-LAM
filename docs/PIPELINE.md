@@ -104,8 +104,9 @@ bash scripts/run.sh doctor \
   --config configs/pipeline_100h_2b.yaml
 ```
 
-Public trained assets are pending upload. The current release provides typed
-stage commands, an optimizer-based CPU integration backend, and a production
-adapter interface. Real adapters fail closed while required assets are absent;
-the repository does not claim end-to-end paper reproduction from a source-only
-clone. See [`TRAINING.md`](TRAINING.md).
+The Hugging Face release provides tensor-exact 2B research checkpoint lineages.
+The source release provides typed stage commands, an optimizer-based CPU
+integration backend, and a production adapter interface. Real adapters fail
+closed while the matching base model, data, or other required assets are
+absent; the repository does not claim end-to-end paper reproduction from a
+source-only clone. See [`TRAINING.md`](TRAINING.md).

@@ -20,7 +20,7 @@ def _jsonl(path: Path) -> list[dict]:
 
 def test_portable_fixture_builds_every_stage_and_preserves_test_split(tmp_path) -> None:
     summary = prepare_episode_manifests(
-        ROOT / "test_data" / "episodes.jsonl",
+        ROOT / "tests" / "fixtures" / "episodes.jsonl",
         tmp_path,
     )
 
@@ -55,7 +55,9 @@ def test_episode_metadata_rejects_nonfinite_fps(tmp_path) -> None:
 
 
 def test_stage3_validator_rejects_reordered_transition(tmp_path) -> None:
-    prepare_episode_manifests(ROOT / "test_data" / "episodes.jsonl", tmp_path)
+    prepare_episode_manifests(
+        ROOT / "tests" / "fixtures" / "episodes.jsonl", tmp_path
+    )
     path = tmp_path / "stage3_windows.jsonl"
     rows = _jsonl(path)
     rows[0]["transition_indices"][0] = [0, 8]

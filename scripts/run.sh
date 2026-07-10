@@ -66,12 +66,12 @@ case "$command" in
   test) "$PY" -m pytest -q "$ROOT/tests" "$@" ;;
   lint) run_lint "$@" ;;
   check) make -C "$ROOT" PYTHON="$PY" check "$@" ;;
-  validate-results) "$PY" "$ROOT/tools/validate_results.py" "$@" ;;
+  validate-results) "$PY" "$ROOT/scripts/validate_results.py" "$@" ;;
   fetch-metrics) bash "$ROOT/scripts/fetch_optional_deps.sh" metrics "$@" ;;
   fetch-base) bash "$ROOT/scripts/fetch_optional_deps.sh" base "$@" ;;
   fetch-all) bash "$ROOT/scripts/fetch_optional_deps.sh" all "$@" ;;
   download-models) "$PY" "$ROOT/scripts/download_models.py" "$@" ;;
-  release-check) "$PY" "$ROOT/tools/release_check.py" --strict "$@" ;;
+  release-check) "$PY" "$ROOT/scripts/release_check.py" --strict "$@" ;;
   -h|--help|help) usage ;;
   *) echo "Unknown command: $command" >&2; usage >&2; exit 2 ;;
 esac

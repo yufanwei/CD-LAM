@@ -21,7 +21,7 @@ help:
 check: release-check lint test smoke data-smoke train-smoke
 
 release-check:
-	$(PYTHON) tools/release_check.py --strict
+	$(PYTHON) scripts/release_check.py --strict
 
 lint:
 	$(RUFF) check .
@@ -35,7 +35,7 @@ smoke:
 data-smoke:
 	rm -rf "$(TRAIN_SMOKE_ROOT)/data"
 	PYTHONPATH="$(PYTHONPATH_ROOT)" $(PYTHON) -m cd_lam data-prepare \
-		--input test_data/episodes.jsonl \
+		--input tests/fixtures/episodes.jsonl \
 		--output "$(TRAIN_SMOKE_ROOT)/data"
 	PYTHONPATH="$(PYTHONPATH_ROOT)" $(PYTHON) -m cd_lam data-validate \
 		--root "$(TRAIN_SMOKE_ROOT)/data"
@@ -51,4 +51,4 @@ clean-wheel:
 
 wheel: clean-wheel
 	$(PYTHON) -m build --wheel --no-isolation --outdir dist
-	$(PYTHON) tools/check_wheel.py dist/*.whl
+	$(PYTHON) scripts/check_wheel.py dist/*.whl

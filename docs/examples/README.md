@@ -17,7 +17,7 @@ bash scripts/run.sh validate-results
 Run both supported conditioning routes without a model checkpoint:
 
 ```bash
-.venv/bin/python examples/conditioning.py
+.venv/bin/python docs/examples/conditioning.py
 ```
 
 The example sends a precomputed `(..., 32)` latent directly through the
@@ -33,6 +33,7 @@ bash scripts/run.sh doctor \
   --config configs/pipeline_100h_2b.yaml
 ```
 
-The configs intentionally leave model and dataset assets unset. Official
-checkpoints are pending upload; these examples validate released primitives
-and configuration contracts, not the paper's trained metrics.
+The configs intentionally leave model and dataset assets unset. The released
+2B research checkpoints are downloaded separately and still require compatible
+base models and data; these examples validate primitives and configuration
+contracts, not the paper's trained metrics.

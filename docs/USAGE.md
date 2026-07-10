@@ -95,7 +95,9 @@ not claim to parse or train from them directly.
 
 ## Release limitations
 
-The trained CD-LAM and ACWM checkpoints are pending upload. The runner does not
-download or invent them. A source-only checkout supports full CPU integration
-validation and production-plan checking; real 2B/14B execution still requires
-a compatible external model adapter, assets, data, and GPU environment.
+The 2B research checkpoint lineages are published on Hugging Face and can be
+downloaded with `bash scripts/run.sh download-models`. The runner verifies every
+selected file against `asset_manifest.json`; it never invents a filename or
+silently substitutes a checkpoint. Real execution still requires the matching
+external base model, adapter, data, and GPU environment. No 14B release weight
+is currently published.

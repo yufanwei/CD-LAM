@@ -18,11 +18,12 @@ latent action condition used by embodied action conditioned world models. It
 adds three LAM fine-tuning objectives, adapts the ACWM to the repaired latent
 space, and then learns a 22D-robot-action-to-32D-latent bridge.
 
-This card describes the method and intended release family. Public trained
-checkpoints are **pending upload** at
-<https://huggingface.co/yufanwei/CD-LAM>. The current source checkout therefore
-supports typed training plans, optimizer/checkpoint integration tests, and
-method primitives, but not inference with an official weight file.
+This card describes the method and release family. Tensor-exact 2B research
+checkpoints for the 100h and 1000h lineages are published at
+<https://huggingface.co/yufanwei/CD-LAM>. They include Stage-1 LAM, Stage-2 and
+Stage-3 ACWM overlays, and matching 22D-to-32D bridges. The source checkout
+provides typed plans and method primitives; applying an overlay still requires
+the compatible external base model and production adapter.
 
 ## Architecture and training stages
 
@@ -62,7 +63,7 @@ The principal Stage-3 manuscript results are:
 
 These are manuscript values, not results recomputed by this source release.
 See [`results/paper_results.json`](results/paper_results.json) for all Tables
-I–V and [`docs/EVAL_PROTOCOL.md`](docs/EVAL_PROTOCOL.md) for intervention and
+I–V and [`EVAL_PROTOCOL.md`](EVAL_PROTOCOL.md) for intervention and
 comparability details.
 
 ## Intended use
@@ -83,7 +84,9 @@ high-stakes decisions.
 
 ## Limitations
 
-- Official weights are not yet public, so full reproduction is gated.
+- The released files cover two 2B research lineages, not a verified 14B or
+  complete headline-table reproduction; the compatible base model, original
+  data, and evaluation assets remain separate requirements.
 - Results cover the datasets, backbones, action conventions, and scales in the
   manuscript; generalization beyond them is not established.
 - FDCE depends on segmentation and tracking. Occlusion, motion blur,
@@ -111,9 +114,9 @@ licenses and access conditions. The model repository therefore uses
 SAM3 is used to produce the paper's Stage-1 and FDCE foreground masks.
 CoWTracker is used only for FDCE tracks. They are not vendored and remain under
 their own source and weight licenses; the CD-LAM Apache-2.0 license does not
-override those terms. See [`third_party/README.md`](third_party/README.md).
+override those terms. See [`../third_party/README.md`](../third_party/README.md).
 
 ## Citation
 
-See [`CITATION.cff`](CITATION.cff). No DOI or arXiv identifier is asserted by
+See [`../CITATION.cff`](../CITATION.cff). No DOI or arXiv identifier is asserted by
 this release until a versioned identifier is published by the authors.

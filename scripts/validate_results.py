@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_RESULTS = ROOT / "results" / "paper_results.json"
+DEFAULT_RESULTS = ROOT / "docs" / "results" / "paper_results.json"
 TITLE = "Causally Debiased Latent Action Model for Embodied Action Conditioned World Models"
 
 

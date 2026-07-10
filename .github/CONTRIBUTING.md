@@ -24,7 +24,7 @@ weights, network access, SAM3, CoWTracker, or private datasets.
   bundles rather than guessing defaults.
 - Keep Stage-1, Stage-2, Stage-3, and intervention protocols distinct in code
   and reporting.
-- Update `results/paper_results.json` only when correcting against an
+- Update `docs/results/paper_results.json` only when correcting against an
   authoritative manuscript revision; include the source table and protocol
   impact in the pull-request description.
 - Do not add checkpoint filenames, hashes, benchmark claims, or public asset

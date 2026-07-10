@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import importlib.util
 import json
+import sys
 from pathlib import Path
 
 import pytest
@@ -15,6 +16,15 @@ SPEC = importlib.util.spec_from_file_location(
 assert SPEC is not None and SPEC.loader is not None
 DOWNLOAD_MODELS = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(DOWNLOAD_MODELS)
+
+
+def test_default_download_directory_is_anchored_to_repository(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(sys, "argv", ["download_models.py", "--dry-run"])
+    args = DOWNLOAD_MODELS.parse_args()
+    assert args.local_dir == ROOT / "artifacts"
 
 
 def _write_release(root: Path, *, content: bytes = b"checkpoint") -> Path:

@@ -46,7 +46,7 @@ jobs:
           python -m pip install --no-deps -e ".[test]"
 
       - name: Release hygiene and English-only scan
-        run: python tools/release_check.py --strict
+        run: python scripts/release_check.py --strict
 
       - name: Ruff
         run: python -m ruff check .
@@ -60,7 +60,7 @@ jobs:
       - name: Portable data pipeline
         run: |
           python -m cd_lam data-prepare \
-            --input test_data/episodes.jsonl \
+            --input tests/fixtures/episodes.jsonl \
             --output "$RUNNER_TEMP/test-data"
           python -m cd_lam data-validate --root "$RUNNER_TEMP/test-data"
 
@@ -97,11 +97,13 @@ jobs:
         run: python -m build --wheel --outdir dist
 
       - name: Inspect wheel contents
-        run: python tools/check_wheel.py dist/*.whl
+        run: python scripts/check_wheel.py dist/*.whl
 
       - name: Install wheel in a clean environment
         run: |
           python -m venv "$RUNNER_TEMP/wheel-venv"
+          "$RUNNER_TEMP/wheel-venv/bin/python" -m pip install \
+            "pip>=24.1,<27"
           "$RUNNER_TEMP/wheel-venv/bin/python" -m pip install torch==2.7.0 \
             --index-url https://download.pytorch.org/whl/cpu
           "$RUNNER_TEMP/wheel-venv/bin/python" -m pip install -r requirements.lock
