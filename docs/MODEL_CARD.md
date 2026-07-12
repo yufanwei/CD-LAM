@@ -18,12 +18,12 @@ latent action condition used by embodied action conditioned world models. It
 adds three LAM fine-tuning objectives, adapts the ACWM to the repaired latent
 space, and then learns a 22D-robot-action-to-32D-latent bridge.
 
-This card describes the method and release family. A compact snapshot with
-exactly three main tensor-exact 2B research entries is prepared for
-<https://huggingface.co/yufanwei/CD-LAM>: a selected masked LAM, its compatible
+This card describes the method and release family. The compact snapshot at
+<https://huggingface.co/yufanwei/CD-LAM> publishes exactly three main
+tensor-exact 2B research entries: a selected masked LAM, its compatible
 pretrained ACWM overlay, and a separate 100h robot-action posttrained overlay.
-It has passed local release validation but has not yet replaced the legacy
-layout on Hugging Face `main`.
+Immutable revision `591e22e582e920cbb4fdfac1a45365e81088bd06` passed local
+release validation and guarded remote clean-room verification.
 The posttrained directory includes its 22D-to-32D bridge and action contract as
 auxiliary files. The source checkout provides typed planners, method
 primitives, concrete 2B launch wrappers, and a manifest-checked source overlay.

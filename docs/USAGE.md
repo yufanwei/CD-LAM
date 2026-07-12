@@ -114,10 +114,10 @@ protocol, and the license notes in
 
 ## Release limitations
 
-The compact three-entry 2B snapshot has been staged and checked locally, but an
-immutable Hugging Face revision is not published yet. Until it is, the model
-downloader rejects the legacy `main` layout before transferring weights. Real
-training also requires the separately licensed NVIDIA base checkpoint,
-user-obtained datasets, compatible CUDA/PyTorch packages, and sufficient GPU
-memory. The source release validates execution and lineage; it does not claim
-to regenerate the manuscript tables from a fresh clone.
+The compact three-entry 2B snapshot is published and pinned by the downloader
+at immutable Hugging Face revision
+`591e22e582e920cbb4fdfac1a45365e81088bd06`. Real training also requires the
+separately licensed NVIDIA base checkpoint, user-obtained datasets, compatible
+CUDA/PyTorch packages, and sufficient GPU memory. The source release validates
+execution and lineage; it does not claim to regenerate the manuscript tables
+from a fresh clone.

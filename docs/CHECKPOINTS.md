@@ -2,10 +2,11 @@
 
 ## Availability
 
-The compact tensor-exact 2B research snapshot is prepared for
-<https://huggingface.co/yufanwei/CD-LAM>, but it has not yet replaced the
-legacy Hugging Face `main`. This source release does not contain the large
-model files. The compact snapshot's `asset_manifest.json` declares
+The compact tensor-exact 2B research snapshot is published at immutable
+Hugging Face revision
+`591e22e582e920cbb4fdfac1a45365e81088bd06` under
+<https://huggingface.co/yufanwei/CD-LAM>. This source release does not contain
+the large model files. The compact snapshot's `asset_manifest.json` declares
 the authoritative filenames, roles, formats, byte sizes, SHA-256 values,
 lineages, and compatibility metadata.
 

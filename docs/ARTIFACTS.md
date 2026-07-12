@@ -11,10 +11,11 @@ configs, tests, documentation, and machine-readable paper-result fixtures.
 
 ## Model repository
 
-The prepared compact snapshot for
+The compact snapshot at
 <https://huggingface.co/yufanwei/CD-LAM> contains exactly three main
-tensor-exact 2B research entries. It is locally verified but has not yet
-replaced the legacy layout on the current Hugging Face `main`:
+tensor-exact 2B research entries. Immutable revision
+`591e22e582e920cbb4fdfac1a45365e81088bd06` passed the guarded publisher's
+remote inventory, clean-room download, and checksum verification:
 
 | entry | path | role |
 |---|---|---|
@@ -33,12 +34,13 @@ trained in a separate 100h latent space and is bound to the colocated bridge.
 Do not load all three as a sequential pipeline or substitute the public LAM
 for the posttrain entry's recorded latent-space identity.
 
-`bash scripts/run.sh download-models` fails closed until an immutable snapshot
-contains release ID `cd-lam-2b-three-entry`, the exact three model identities,
-the two required posttraining auxiliaries, a pinned public runtime, a pinned
-base model, and a tensor-exact manifest. Selective `--allow-pattern` downloads
-always include that manifest and must match a declared asset path; downloaded
-files are checked against their recorded size and SHA-256.
+`bash scripts/run.sh download-models` selects that immutable revision by default
+and fails closed unless the snapshot contains release ID
+`cd-lam-2b-three-entry`, the exact three model identities, the two required
+posttraining auxiliaries, a pinned public runtime, a pinned base model, and a
+tensor-exact manifest. Selective `--allow-pattern` downloads always include
+that manifest and must match a declared asset path; downloaded files are
+checked against their recorded size and SHA-256.
 
 ## Included versus external
 
@@ -49,7 +51,7 @@ files are checked against their recorded size and SHA-256.
 | pinned 2B launch wrappers and manifest-checked source overlay | yes | complete upstream source is staged outside Git |
 | portable protocol configs, custom-backbone interface, and asset validation | yes | no |
 | exact paper tables as JSON | yes | no |
-| three main 2B CD-LAM research entries | no | compact snapshot prepared; publication pending |
+| three main 2B CD-LAM research entries | no | published at immutable revision `591e22e` |
 | 14B CD-LAM checkpoints | no | not released |
 | base 2B/14B backbones | no | user-supplied under upstream terms |
 | Cosmos video tokenizer and text encoder | no | pinned gated NVIDIA assets |

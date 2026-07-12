@@ -23,11 +23,19 @@ def test_default_download_directory_is_anchored_to_repository(
 ) -> None:
     monkeypatch.chdir(tmp_path)
     monkeypatch.delenv("CDLAM_HF_REVISION", raising=False)
-    monkeypatch.setattr(DOWNLOAD_MODELS, "DEFAULT_REVISION", None)
     monkeypatch.setattr(sys, "argv", ["download_models.py", "--dry-run"])
     args = DOWNLOAD_MODELS.parse_args()
     assert args.local_dir == ROOT / "artifacts"
-    assert args.revision is None
+    assert args.revision == DOWNLOAD_MODELS.PUBLISHED_REVISION
+
+
+def test_environment_can_override_published_revision(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    revision = "a" * 40
+    monkeypatch.setenv("CDLAM_HF_REVISION", revision)
+    monkeypatch.setattr(sys, "argv", ["download_models.py", "--dry-run"])
+    assert DOWNLOAD_MODELS.parse_args().revision == revision
 
 
 def _write_release(

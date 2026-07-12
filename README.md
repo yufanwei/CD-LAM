@@ -51,13 +51,13 @@ tables and comparison qualification are in
 
 > **Release status:** source setup, CPU integration, the pinned 2B runtime
 > overlay, real stage launchers, AgiBot/EgoDex preparation, action-contract
-> binding, and result validators are included. A compact Hugging Face snapshot
-> with exactly three main 2B entries has passed local tensor, schema, and
-> checksum validation, but publication at an immutable Hugging Face revision is
-> still pending; the downloader deliberately rejects the current legacy
-> `main`. Datasets, the NVIDIA base checkpoint, and 14B weights are not
-> redistributed. The release tests execution and lineage; it does not claim
-> that a source-only clone reproduces the manuscript tables.
+> binding, and result validators are included. The compact Hugging Face snapshot
+> with exactly three main 2B entries is published at immutable revision
+> [`591e22e`](https://huggingface.co/yufanwei/CD-LAM/commit/591e22e582e920cbb4fdfac1a45365e81088bd06)
+> after tensor, schema, checksum, and clean-room download validation. Datasets,
+> the NVIDIA base checkpoint, and 14B weights are not redistributed. The release
+> tests execution and lineage; it does not claim that a source-only clone
+> reproduces the manuscript tables.
 
 ## Quick start
 
@@ -255,14 +255,12 @@ rules, and minimum checks are in [Data preparation](docs/DATA.md) and
 
 ## Download released models
 
-The compact three-entry snapshot is locally upload-ready but has not yet
-replaced the legacy Hugging Face `main`. Model download therefore fails before
-network transfer unless an immutable compact-release commit is supplied. After
-that commit is published, create the environment, pass every source gate,
-download the snapshot, and verify every model hash with:
+The compact three-entry snapshot is published at immutable Hugging Face
+revision `591e22e582e920cbb4fdfac1a45365e81088bd06`. Create the environment,
+pass every source gate, download that pinned snapshot, and verify every model
+hash with:
 
 ```bash
-export CDLAM_HF_REVISION=<40-character-Hugging-Face-commit>
 bash scripts/bootstrap.sh --with-models
 ```
 
@@ -273,13 +271,13 @@ download extra and use a quoted Hugging Face allow pattern:
 ```bash
 .venv/bin/python -m pip install -e '.[download]'
 bash scripts/run.sh download-models \
-  --revision "$CDLAM_HF_REVISION" \
   --allow-pattern 'models/posttrain-100h/*'
 ```
 
 Every selective request automatically includes `asset_manifest.json`; the
-command rejects the legacy layout, mutable official-repository revisions,
-wrong model identities, missing files, size mismatches, and SHA-256 mismatches. The
+command rejects mutable official-repository revisions, wrong model identities,
+missing files, size mismatches, and SHA-256 mismatches. Set
+`CDLAM_HF_REVISION` only to deliberately select another immutable release. The
 LAM and pretrain entries are compatible with each other. `posttrain-100h`
 belongs to a different 100h latent-space lineage and must use its colocated
 bridge/contract; the three entries are not one direct chain. Model roles and
