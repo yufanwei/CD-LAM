@@ -15,7 +15,7 @@
 </div>
 
 <p align="center">
-  <img src="docs/assets/cdlam-causal.png" alt="Causal debiasing separates action from temporal and visual confounders" width="82%">
+  <img src="docs/assets/cdlam-overview.png" alt="CD-LAM overview: debiased latent-action learning and action-conditioned world-model adaptation" width="100%">
 </p>
 
 CD-LAM reduces action-irrelevant bias before latent actions condition a world
