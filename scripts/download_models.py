@@ -371,8 +371,9 @@ def main() -> int:
     args = parse_args()
     if not args.revision:
         raise SystemExit(
-            "No compact-release revision is pinned yet. Set CDLAM_HF_REVISION "
-            "to the published 40-character Hugging Face commit."
+            "No Hugging Face revision was provided. Unset the empty "
+            "CDLAM_HF_REVISION value to use the published immutable revision, "
+            "or set it to a 40-character commit."
         )
     if args.repo_id == "yufanwei/CD-LAM" and _HEX40.fullmatch(args.revision) is None:
         raise SystemExit(
