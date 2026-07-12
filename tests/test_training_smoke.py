@@ -69,12 +69,12 @@ def test_synthetic_checkpoint_resume_records_total_steps(tmp_path) -> None:
         resume_from=first.checkpoint,
     )
     resumed = execute_stage(resumed_config, resumed_plan)
-    checkpoint = torch.load(
-        resumed.checkpoint, map_location="cpu", weights_only=False
-    )
+    checkpoint = torch.load(resumed.checkpoint, map_location="cpu", weights_only=False)
 
     assert resumed.start_step == 1
     assert resumed.steps == 3
     assert checkpoint["metadata"]["steps"] == 3
-    assert checkpoint["metadata"]["protocol_steps"] == first_config.stage1.protocol_steps
+    assert (
+        checkpoint["metadata"]["protocol_steps"] == first_config.stage1.protocol_steps
+    )
     assert checkpoint["optimizer_state"]["state"]

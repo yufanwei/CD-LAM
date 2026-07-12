@@ -19,9 +19,7 @@ def test_external_plan_fails_closed_without_assets_or_adapter(tmp_path) -> None:
 
 def test_synthetic_plan_is_cpu_only_and_ready(tmp_path) -> None:
     config = PipelineConfig.synthetic(tmp_path / "outputs", seed=9)
-    plan = build_stage_plan(
-        config, StageName.BRIDGE, synthetic=True, target_steps=3
-    )
+    plan = build_stage_plan(config, StageName.BRIDGE, synthetic=True, target_steps=3)
     assert plan.ready
     assert plan.device == "cpu"
     assert plan.seed == 9

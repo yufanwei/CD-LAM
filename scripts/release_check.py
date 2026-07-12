@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import re
@@ -25,13 +26,26 @@ SKIP_DIRS = {
     "outputs",
 }
 TEXT_SUFFIXES = {
-    ".cff", ".cfg", ".env", ".ini", ".json", ".md", ".py", ".sh",
-    ".patch", ".toml", ".txt", ".yaml", ".yml",
+    ".cff",
+    ".cfg",
+    ".env",
+    ".ini",
+    ".json",
+    ".md",
+    ".py",
+    ".sh",
+    ".patch",
+    ".toml",
+    ".txt",
+    ".yaml",
+    ".yml",
 }
 TEXT_FILENAMES = {".gitattributes", ".gitignore", "LICENSE", "Makefile", "NOTICE"}
+FORBIDDEN_BINARY_SUFFIXES = {".ckpt", ".npz", ".parquet", ".pt", ".pth", ".safetensors"}
 CJK_TEXT = re.compile(r"[\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff]")
 FORBIDDEN = {
     "private workspace path": re.compile(r"/(?:workspace|home)/yufan|/tmp/data"),
+    "private cluster path": re.compile(r"/(?:mnt|scratch|gpfs|lustre)(?:/|-)"),
     "dated temporary tool": re.compile(r"tmp_remote_eval_tools_\\d+"),
     "private runtime namespace": re.compile(r"DREAMDOJO_ROOT|DREAMDOJO_REPO"),
     "credential material": re.compile(
@@ -49,6 +63,7 @@ ALLOWED_TOP_LEVEL = {
     "README.md",
     "configs",
     "docs",
+    "internal",
     "pyproject.toml",
     "requirements.lock",
     "scripts",
@@ -56,6 +71,14 @@ ALLOWED_TOP_LEVEL = {
     "tests",
     "third_party",
 }
+
+
+def _sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
 
 
 def _fallback_files() -> list[Path]:
@@ -80,7 +103,10 @@ def tracked_files() -> list[Path]:
         text=True,
         check=False,
     )
-    if top_level.returncode or Path(top_level.stdout.strip()).resolve() != ROOT.resolve():
+    if (
+        top_level.returncode
+        or Path(top_level.stdout.strip()).resolve() != ROOT.resolve()
+    ):
         return _fallback_files()
     proc = subprocess.run(
         [
@@ -111,7 +137,42 @@ def tracked_files() -> list[Path]:
 
 
 def _is_release_text(path: Path) -> bool:
-    return path.suffix.lower() in TEXT_SUFFIXES or path.name in TEXT_FILENAMES
+    return (
+        path.suffix.lower() in TEXT_SUFFIXES
+        or path.name in TEXT_FILENAMES
+        or path.name.endswith(".env.example")
+    )
+
+
+def _allows_internal_reference(label: str, relative: Path) -> bool:
+    """Allow declared prepared-workspace references without relaxing secrets."""
+
+    if label not in {"private workspace path", "private runtime namespace"}:
+        return False
+    allowed: dict[str, set[Path]] = {
+        "private workspace path": {
+            Path("configs/runtime.184.env.example"),
+            Path("configs/runtime.workspace.env.example"),
+            Path("docs/14B_STATUS.md"),
+            Path("docs/GPU_SMOKE.md"),
+            Path("docs/INTERNAL_USE.md"),
+            Path("docs/validation/LOCAL_GPU.md"),
+            Path("docs/validation/REMOTE_184.md"),
+            Path("internal/hf_release/README.md"),
+            Path("internal/runtime/entries/stage1_lam.py"),
+            Path("internal/runtime/entries/stage2_wm.py"),
+            Path("internal/tools/sanitize_checkpoint.py"),
+            Path("scripts/gpu_smoke.sh"),
+            Path("tests/test_sanitize_checkpoint.py"),
+        },
+        "private runtime namespace": {
+            Path("internal/runtime/entries/stage1_lam.py"),
+            Path("internal/runtime/entries/stage2_wm.py"),
+            Path("internal/runtime/entries/stage3_posttrain.py"),
+            Path("scripts/run_internal.sh"),
+        },
+    }
+    return relative in allowed[label]
 
 
 def main() -> int:
@@ -144,6 +205,11 @@ def main() -> int:
             errors.append(f"file exceeds 20 MiB: {rel} ({size} bytes)")
         if not os.access(path, os.R_OK):
             errors.append(f"file is not readable: {rel}")
+        if path.suffix.lower() in FORBIDDEN_BINARY_SUFFIXES:
+            errors.append(
+                f"binary data/model artifact is not release-safe: {rel}; "
+                "publish it through the documented external asset flow"
+            )
         if not _is_release_text(path):
             continue
         text_files += 1
@@ -160,10 +226,11 @@ def main() -> int:
         if rel == Path("scripts/release_check.py"):
             continue
         for label, pattern in FORBIDDEN.items():
-            if pattern.search(text):
+            if pattern.search(text) and not _allows_internal_reference(label, rel):
                 errors.append(f"{label}: {rel}")
 
     for path in files:
+        rel = path.relative_to(ROOT)
         if path.suffix == ".json":
             try:
                 json.loads(path.read_text(encoding="utf-8"))
@@ -188,15 +255,29 @@ def main() -> int:
                 errors.append(
                     f"shell syntax failed {path.relative_to(ROOT)}: {proc.stderr.strip()}"
                 )
-            if not os.access(path, os.X_OK):
-                warnings.append(f"shell script is not executable: {path.relative_to(ROOT)}")
+            if not os.access(path, os.X_OK) and rel.parts[:2] != (
+                "internal",
+                "vendor",
+            ):
+                warnings.append(
+                    f"shell script is not executable: {path.relative_to(ROOT)}"
+                )
 
     required = [
-        "README.md", "LICENSE", "NOTICE", "CITATION.cff", "pyproject.toml",
-        ".github/CONTRIBUTING.md", "docs/MODEL_CARD.md",
-        "docs/RELEASE_MANIFEST.md", "docs/TRAINING_CORRECTNESS.md",
-        "src/cd_lam/__init__.py", "tests", "tests/fixtures/episodes.jsonl",
-        "third_party/dependencies.lock.json", "scripts/check_wheel.py",
+        "README.md",
+        "LICENSE",
+        "NOTICE",
+        "CITATION.cff",
+        "pyproject.toml",
+        ".github/CONTRIBUTING.md",
+        "docs/MODEL_CARD.md",
+        "docs/RELEASE_MANIFEST.md",
+        "docs/TRAINING_CORRECTNESS.md",
+        "src/cd_lam/__init__.py",
+        "tests",
+        "tests/fixtures/episodes.jsonl",
+        "third_party/dependencies.lock.json",
+        "scripts/check_wheel.py",
     ]
     for item in required:
         if not (ROOT / item).exists():
@@ -224,6 +305,44 @@ def main() -> int:
                         f"dependency lock {dependency.get('name', '<unnamed>')} "
                         f"{field} is not pinned by fetch_optional_deps.sh"
                     )
+            if not dependency.get("runtime_overlay_bundled"):
+                continue
+            overlay_relative = dependency.get("runtime_overlay_manifest")
+            if not isinstance(overlay_relative, str):
+                errors.append("bundled runtime overlay has no manifest path")
+                continue
+            overlay_manifest = ROOT / overlay_relative
+            if not overlay_manifest.is_file():
+                errors.append(
+                    f"runtime overlay manifest is missing: {overlay_relative}"
+                )
+                continue
+            expected_manifest_hash = dependency.get("runtime_overlay_manifest_sha256")
+            if _sha256(overlay_manifest) != expected_manifest_hash:
+                errors.append("runtime overlay manifest SHA-256 does not match lock")
+                continue
+            overlay_payload = json.loads(overlay_manifest.read_text(encoding="utf-8"))
+            overlay_rows = overlay_payload.get("overlays")
+            expected_count = dependency.get("runtime_overlay_files")
+            if (
+                not isinstance(overlay_rows, list)
+                or len(overlay_rows) != expected_count
+            ):
+                errors.append("runtime overlay file count does not match lock")
+                continue
+            if overlay_payload.get("base_commit") != dependency.get("revision"):
+                errors.append("runtime overlay base commit does not match lock")
+            for row in overlay_rows:
+                if not isinstance(row, dict) or not isinstance(row.get("path"), str):
+                    errors.append("runtime overlay row is invalid")
+                    continue
+                overlay_file = overlay_manifest.parent / row["path"]
+                if (
+                    not overlay_file.is_file()
+                    or overlay_file.stat().st_size != row.get("bytes")
+                    or _sha256(overlay_file) != row.get("sha256")
+                ):
+                    errors.append(f"runtime overlay file does not match: {row['path']}")
 
     ci_path = ROOT / ".github" / "workflows" / "ci.yml"
     if ci_path.is_file():

@@ -19,9 +19,13 @@ def test_fdce_identical_and_global_offset_tracks_are_zero() -> None:
             [[3.0, 0.0], [9.0, 5.0]],
         ]
     )
-    assert foreground_displacement_chamfer_error(reference, reference) == pytest.approx(0.0)
+    assert foreground_displacement_chamfer_error(reference, reference) == pytest.approx(
+        0.0
+    )
     generated = reference + np.array([100.0, -40.0])
-    assert foreground_displacement_chamfer_error(generated, reference) == pytest.approx(0.0)
+    assert foreground_displacement_chamfer_error(generated, reference) == pytest.approx(
+        0.0
+    )
 
 
 def test_fdce_single_track_analytical_mean_over_time_cost() -> None:
@@ -30,7 +34,9 @@ def test_fdce_single_track_analytical_mean_over_time_cost() -> None:
     costs = pairwise_displacement_costs(generated, reference)
     # Rollout errors are 1 and 3 pixels; c_00=(1+3)/2=2 (Eq. A.3).
     np.testing.assert_allclose(costs, [[2.0]])
-    assert foreground_displacement_chamfer_error(generated, reference) == pytest.approx(2.0)
+    assert foreground_displacement_chamfer_error(generated, reference) == pytest.approx(
+        2.0
+    )
 
 
 def test_fdce_uses_pair_time_means_before_chamfer() -> None:
@@ -51,7 +57,9 @@ def test_fdce_uses_pair_time_means_before_chamfer() -> None:
             [[10.0, 0.0], [10.0, 0.0]],
         ]
     )
-    assert foreground_displacement_chamfer_error(generated, reference) == pytest.approx(5.0)
+    assert foreground_displacement_chamfer_error(generated, reference) == pytest.approx(
+        5.0
+    )
 
 
 def test_fdce_visibility_filter_discards_low_visibility_track() -> None:

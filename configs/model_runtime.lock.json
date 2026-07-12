@@ -1,0 +1,132 @@
+{
+  "schema_version": 1,
+  "profile": "linux-x86_64-cpython310-cu128-torch27",
+  "installer": {
+    "uv_version": "0.9.7",
+    "upstream_extra": "cu128",
+    "include_upstream_dev_group": false,
+    "post_sync_reinstall": {
+      "opencv-python-headless": "4.11.0.86"
+    }
+  },
+  "source": {
+    "repository": "https://github.com/NVIDIA/DreamDojo.git",
+    "revision": "02f119b759d5c7f84a399fdeea3c6e82e7ed6cff",
+    "uv_lock_sha256": "29ca202b387bbc1f6a588700f4f66b5961bd53023f93b4e2165760b7cfc50a36"
+  },
+  "platform": {
+    "system": "Linux",
+    "machine": "x86_64",
+    "python_implementation": "CPython",
+    "python_major_minor": "3.10",
+    "glibc_minimum": "2.35",
+    "cuda_wheel_line": "12.8",
+    "nvidia_driver_minimum": "570.124.06",
+    "upstream_container_base": "nvidia/cuda:12.8.1-cudnn-devel-ubuntu24.04"
+  },
+  "recorded_h100_execution": {
+    "operating_system": "Ubuntu 22.04.5 LTS",
+    "python": "3.10.18",
+    "accelerator": "NVIDIA H100 80GB HBM3",
+    "nvidia_driver": "580.126.09",
+    "evidence_scope": "one linked 2B optimizer update per training stage; execution and lineage only"
+  },
+  "critical_distributions": {
+    "av": "16.0.1",
+    "cosmos-cuda": "1.4.1",
+    "cosmos-oss": "1.4.1",
+    "cosmos-predict2": "1.4.1",
+    "decord": "0.6.0",
+    "flash-attn": "2.7.3+cu128.torch27",
+    "h5py": "3.16.0",
+    "lightning": "2.6.5",
+    "lightning-utilities": "0.15.3",
+    "natten": "0.21.0+cu128.torch27",
+    "numpy": "2.2.6",
+    "opencv-python": "4.11.0.86",
+    "opencv-python-headless": "4.11.0.86",
+    "packaging": "25.0",
+    "pandas": "2.3.3",
+    "pyarrow": "22.0.0",
+    "pytorch3d": "0.7.9",
+    "pytorch-lightning": "2.6.5",
+    "PyYAML": "6.0.3",
+    "torch": "2.7.0+cu128",
+    "torchmetrics": "1.9.0",
+    "torchvision": "0.22.0+cu128",
+    "transformer-engine": "2.2+cu128.torch27",
+    "transformers": "4.51.3",
+    "xformers": "0.0.30"
+  },
+  "required_modules": [
+    "av",
+    "cosmos_cuda",
+    "cosmos_oss",
+    "cosmos_predict2",
+    "cv2",
+    "decord",
+    "groot_dreams.dataloader",
+    "h5py",
+    "lightning",
+    "numpy",
+    "packaging",
+    "pandas",
+    "pyarrow",
+    "pytorch3d.transforms",
+    "torch",
+    "torchvision",
+    "transformer_engine",
+    "transformers",
+    "xformers",
+    "yaml"
+  ],
+  "allowed_metadata_conflicts": [
+    {
+      "kind": "version",
+      "requiring_distribution": "cosmos-predict2",
+      "requiring_version": "1.4.1",
+      "required_distribution": "cosmos-oss",
+      "specifier": "==0.1.0",
+      "installed_version": "1.4.1",
+      "reason": "The pinned upstream workspace package is version 1.4.1 while the root project metadata still declares cosmos-oss 0.1.0."
+    },
+    {
+      "kind": "version",
+      "requiring_distribution": "megatron-core",
+      "requiring_version": "0.14.0",
+      "required_distribution": "numpy",
+      "specifier": "<2.0.0",
+      "installed_version": "2.2.6",
+      "reason": "The pinned upstream uv configuration overrides the environment to NumPy 2 while megatron-core retains its older NumPy upper bound."
+    }
+  ],
+  "editable_sources": {
+    "cosmos-cuda": "packages/cosmos-cuda",
+    "cosmos-oss": "packages/cosmos-oss",
+    "cosmos-predict2": "."
+  },
+  "extra_sources": {
+    "pytorch3d": {
+      "repository": "https://github.com/facebookresearch/pytorch3d.git",
+      "revision": "1f7f85c0a3abcce0644f33d32ee911f10a9cac26",
+      "extensions": "disabled; CD-LAM uses the pure-Python rotation transforms only"
+    }
+  },
+  "gated_assets_not_installed": [
+    {
+      "repository": "nvidia/DreamDojo",
+      "revision": "89d029e10816d2995d700cb8ba06f171e0504203",
+      "role": "compatible base LAM and 2B world-model checkpoint"
+    },
+    {
+      "repository": "nvidia/Cosmos-Predict2.5-2B",
+      "revision": "6787e176dce74a101d922174a95dba29fa5f0c55",
+      "role": "Cosmos video tokenizer"
+    },
+    {
+      "repository": "nvidia/Cosmos-Reason1-7B",
+      "revision": "3210bec0495fdc7a8d3dbb8d58da5711eab4b423",
+      "role": "Cosmos text encoder"
+    }
+  ]
+}

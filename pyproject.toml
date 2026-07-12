@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=77", "wheel"]
+requires = ["setuptools>=77,<84", "wheel>=0.43,<1"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -36,14 +36,22 @@ dependencies = [
 
 [project.scripts]
 cdlam = "cd_lam.__main__:main"
+cdlam-runtime = "cdlam_runtime.cli:main"
 
 [project.optional-dependencies]
 test = [
   "build>=1.2,<2",
   "pytest>=8,<9",
   "ruff==0.13.2",
+  "wheel>=0.43,<1",
 ]
 download = ["huggingface-hub>=0.36,<1"]
+data = [
+  "av>=12,<17",
+  "h5py>=3.10,<4",
+  "pandas>=2,<3",
+  "pyarrow>=14,<23",
+]
 
 [project.urls]
 Homepage = "https://yufanwei.github.io/CD-LAM-project-page/"
@@ -66,6 +74,7 @@ extend-exclude = [
   "build",
   "data",
   "dist",
+  "internal/vendor",
   "outputs",
   "*.egg-info",
 ]

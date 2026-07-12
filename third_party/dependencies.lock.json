@@ -8,6 +8,17 @@
       "license": "Apache-2.0",
       "bundled": false,
       "fetch_mode": "source-script",
+      "patches": [
+        "third_party/patches/acwm_timestamp_nearest_neighbor.patch"
+      ],
+      "patch_application": "manual-after-git-apply-check",
+      "source_validator": "internal/runtime/validate_eval_source.py",
+      "runtime_overlay_required": true,
+      "runtime_overlay_bundled": true,
+      "runtime_overlay_manifest": "third_party/acwm_overlay/manifest.json",
+      "runtime_overlay_files": 61,
+      "runtime_overlay_manifest_sha256": "dca6c2766f6527b0aa0211de38ab86d5336425098af2edbd153a45d0cea5fc3a",
+      "integration_note": "The fetch-base command checks out this exact upstream revision, verifies every bundled overlay file and modified-base hash, and stages a separate ACWM runtime under .deps/acwm-runtime.",
       "required_for": ["full 2B/14B training", "full rollout inference"]
     },
     {

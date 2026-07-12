@@ -33,7 +33,9 @@ def _build_parser() -> argparse.ArgumentParser:
         help="optional JSON/YAML runtime profile whose configured assets should be checked",
     )
 
-    subparsers.add_parser("smoke", help="run a deterministic CPU core-library smoke test")
+    subparsers.add_parser(
+        "smoke", help="run a deterministic CPU core-library smoke test"
+    )
 
     for command, help_text in (
         ("stage1", "run or plan LAM debiased fine-tuning"),
@@ -53,7 +55,9 @@ def _build_parser() -> argparse.ArgumentParser:
         stage.add_argument("--steps", type=int)
         stage.add_argument("--device")
         stage.add_argument("--seed", type=int)
-        stage.add_argument("--adapter", help="override module:factory adapter specification")
+        stage.add_argument(
+            "--adapter", help="override module:factory adapter specification"
+        )
         stage.add_argument("--resume", type=Path)
         stage.add_argument("--json", action="store_true")
 
@@ -84,6 +88,17 @@ def _build_parser() -> argparse.ArgumentParser:
         "data-validate", help="validate prepared staged JSONL manifests"
     )
     data_validate.add_argument("--root", type=Path, required=True)
+
+    score_fdce = subparsers.add_parser(
+        "score-fdce", help="score protocol-compatible foreground track bundles"
+    )
+    score_fdce.add_argument("--tracks", type=Path, nargs="+", required=True)
+    score_fdce.add_argument("--output", type=Path)
+    score_fdce.add_argument("--expected-frames", type=int, default=49)
+    score_fdce.add_argument("--max-tracks", type=int, default=16)
+    score_fdce.add_argument("--visibility-threshold", type=float, default=0.5)
+    score_fdce.add_argument("--min-visible-fraction", type=float, default=0.8)
+    score_fdce.add_argument("--min-common-frames", type=int, default=1)
     return parser
 
 
@@ -96,13 +111,17 @@ def _dependency_report() -> tuple[list[str], list[str]]:
         except Exception as exc:
             failures.append(f"[fail] {module_name}: {exc}")
         else:
-            messages.append(f"[ok] {module_name} {getattr(module, '__version__', 'unknown')}")
+            messages.append(
+                f"[ok] {module_name} {getattr(module, '__version__', 'unknown')}"
+            )
     return messages, failures
 
 
 def _load_profile(path: Path) -> Any:
     if not path.is_file():
-        raise FileNotFoundError(f"runtime config does not exist or is not a file: {path}")
+        raise FileNotFoundError(
+            f"runtime config does not exist or is not a file: {path}"
+        )
     text = path.read_text(encoding="utf-8")
     if path.suffix.lower() == ".json":
         return json.loads(text)
@@ -133,7 +152,9 @@ def _iter_configured_assets(profile: Any) -> Iterable[tuple[str, str]]:
         "bridge_bundle",
     }
 
-    def walk(value: Any, key_path: tuple[str, ...], in_assets: bool) -> Iterable[tuple[str, str]]:
+    def walk(
+        value: Any, key_path: tuple[str, ...], in_assets: bool
+    ) -> Iterable[tuple[str, str]]:
         if isinstance(value, dict):
             for key, child in value.items():
                 key_string = str(key)
@@ -221,15 +242,21 @@ def _doctor(*, strict: bool, config: Optional[Path]) -> int:
         messages.extend(asset_messages)
         failures.extend(asset_failures)
     elif strict:
-        messages.append("[ok] bootstrap strict mode: no runtime profile supplied; assets not required")
+        messages.append(
+            "[ok] bootstrap strict mode: no runtime profile supplied; assets not required"
+        )
 
     for message in messages + failures:
         print(message)
-    if failures and (strict or any(message.startswith("[fail]") for message in failures)):
+    if failures and (
+        strict or any(message.startswith("[fail]") for message in failures)
+    ):
         print("CD-LAM doctor: FAIL")
         return 1
     if failures:
-        print("CD-LAM doctor: PASS (optional configured assets missing; use --strict to enforce)")
+        print(
+            "CD-LAM doctor: PASS (optional configured assets missing; use --strict to enforce)"
+        )
     else:
         print("CD-LAM doctor: PASS")
     return 0
@@ -364,8 +391,7 @@ def _train_smoke(args: argparse.Namespace) -> int:
         print(json.dumps(payload, indent=2, sort_keys=True))
     else:
         print(
-            "train-smoke: PASS "
-            + " -> ".join(result.stage.value for result in results)
+            "train-smoke: PASS " + " -> ".join(result.stage.value for result in results)
         )
         print(f"summary: {summary_path}")
     return 0
@@ -395,6 +421,27 @@ def _data_validate(args: argparse.Namespace) -> int:
     return 0
 
 
+def _score_fdce(args: argparse.Namespace) -> int:
+    from .evaluation import score_fdce_bundles, write_report_atomic
+
+    expected_frames = None if args.expected_frames == 0 else args.expected_frames
+    report = score_fdce_bundles(
+        args.tracks,
+        expected_frames=expected_frames,
+        max_tracks=args.max_tracks,
+        visibility_threshold=args.visibility_threshold,
+        min_visible_fraction=args.min_visible_fraction,
+        min_common_frames=args.min_common_frames,
+    )
+    payload = json.dumps(report, indent=2, sort_keys=True, allow_nan=False)
+    if args.output is None:
+        print(payload)
+    else:
+        write_report_atomic(report, args.output)
+        print(f"FDCE report: {args.output.expanduser().resolve()}")
+    return 0
+
+
 def main(argv: Optional[Sequence[str]] = None) -> int:
     args = _build_parser().parse_args(argv)
     if args.command == "validate-bridge":
@@ -420,7 +467,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             from .plans import PlanError
             from .training.common import StageExecutionError
 
-            if isinstance(exc, (AdapterError, ConfigError, PlanError, StageExecutionError)):
+            if isinstance(
+                exc, (AdapterError, ConfigError, PlanError, StageExecutionError)
+            ):
                 print(f"ERROR: {exc}", file=sys.stderr)
                 return 2
             raise
@@ -438,11 +487,25 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             raise
     if args.command in {"data-prepare", "data-validate"}:
         try:
-            return _data_prepare(args) if args.command == "data-prepare" else _data_validate(args)
+            return (
+                _data_prepare(args)
+                if args.command == "data-prepare"
+                else _data_validate(args)
+            )
         except Exception as exc:
             from .data import DataContractError
 
             if isinstance(exc, DataContractError):
+                print(f"ERROR: {exc}", file=sys.stderr)
+                return 2
+            raise
+    if args.command == "score-fdce":
+        try:
+            return _score_fdce(args)
+        except Exception as exc:
+            from .evaluation import EvaluationError
+
+            if isinstance(exc, (EvaluationError, FileNotFoundError)):
                 print(f"ERROR: {exc}", file=sys.stderr)
                 return 2
             raise

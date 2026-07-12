@@ -17,7 +17,9 @@ def _validate_float_tensor(name: str, value: Tensor, *, min_ndim: int = 1) -> No
     if not isinstance(value, Tensor):
         raise TypeError(f"{name} must be a torch.Tensor, got {type(value).__name__}")
     if value.ndim < min_ndim:
-        raise ValueError(f"{name} must have at least {min_ndim} dimension(s), got {value.ndim}")
+        raise ValueError(
+            f"{name} must have at least {min_ndim} dimension(s), got {value.ndim}"
+        )
     if not value.dtype.is_floating_point:
         raise TypeError(f"{name} must be floating point, got dtype {value.dtype}")
 
@@ -157,7 +159,9 @@ def siglip_action_contrastive_loss(
 
     _validate_float_tensor("embeddings", embeddings, min_ndim=2)
     if embeddings.ndim != 2:
-        raise ValueError(f"embeddings must have shape (B, D), got {tuple(embeddings.shape)}")
+        raise ValueError(
+            f"embeddings must have shape (B, D), got {tuple(embeddings.shape)}"
+        )
     batch_size, embedding_dim = embeddings.shape
     if batch_size < 1 or embedding_dim < 1:
         raise ValueError("embeddings must have non-empty batch and feature dimensions")
@@ -173,7 +177,9 @@ def siglip_action_contrastive_loss(
                 f"got {tuple(primitive_labels.shape)}"
             )
         if primitive_labels.device != embeddings.device:
-            raise ValueError("primitive_labels and embeddings must be on the same device")
+            raise ValueError(
+                "primitive_labels and embeddings must be on the same device"
+            )
         valid_label = primitive_labels != ignore_index
         targets = torch.where(
             primitive_labels[:, None] == primitive_labels[None, :],
@@ -203,7 +209,10 @@ def siglip_action_contrastive_loss(
             batch_size, dtype=torch.bool, device=embeddings.device
         )
     if pair_mask is not None:
-        if not isinstance(pair_mask, Tensor) or pair_mask.shape != (batch_size, batch_size):
+        if not isinstance(pair_mask, Tensor) or pair_mask.shape != (
+            batch_size,
+            batch_size,
+        ):
             shape = getattr(pair_mask, "shape", None)
             raise ValueError(
                 f"pair_mask must be a tensor of shape ({batch_size}, {batch_size}), got {shape}"
@@ -379,7 +388,9 @@ def relative_zero_transition_loss(
                 f"got {transition_latents.shape[-1]} and {zero_latents.shape[-1]}"
             )
         if transition_latents.device != zero_latents.device:
-            raise ValueError("transition_latents and zero_latents must be on the same device")
+            raise ValueError(
+                "transition_latents and zero_latents must be on the same device"
+            )
         ordinary_norm_sq = transition_latents.float().square().sum(dim=-1)
         scale = ordinary_norm_sq.mean().sqrt().detach()
     else:
@@ -410,7 +421,9 @@ def latent_space_calibration_loss(
 ) -> Tensor:
     """Combined free-bits KL and relative zero-transition calibration (Eq. 11)."""
 
-    return free_bits_kl_loss(mean, log_variance, free_bits=free_bits) + relative_zero_transition_loss(
+    return free_bits_kl_loss(
+        mean, log_variance, free_bits=free_bits
+    ) + relative_zero_transition_loss(
         zero_latents,
         transition_latents,
         transition_rms=transition_rms,

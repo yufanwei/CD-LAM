@@ -230,7 +230,9 @@ def _boolean(mapping: Mapping[str, Any], key: str, default: bool = False) -> boo
     return value
 
 
-def _resolve_path(value: Any, label: str, root: Path, *, optional: bool) -> Optional[Path]:
+def _resolve_path(
+    value: Any, label: str, root: Path, *, optional: bool
+) -> Optional[Path]:
     if value is None and optional:
         return None
     if not isinstance(value, (str, os.PathLike)) or not str(value).strip():
@@ -238,7 +240,9 @@ def _resolve_path(value: Any, label: str, root: Path, *, optional: bool) -> Opti
         raise ConfigError(f"{label} must be a non-empty path{suffix}")
     expanded = os.path.expandvars(os.path.expanduser(str(value)))
     if "$" in expanded:
-        raise ConfigError(f"{label} contains an unresolved environment variable: {value}")
+        raise ConfigError(
+            f"{label} contains an unresolved environment variable: {value}"
+        )
     path = Path(expanded)
     if not path.is_absolute():
         path = root / path
@@ -269,7 +273,9 @@ def _base_stage(
         ),
         "learning_rate": _number(raw, "learning_rate", default_lr),
         "adapter": _optional_string(raw, "adapter") or adapter,
-        "observed_checkpoint_steps": _optional_integer(raw, "observed_checkpoint_steps"),
+        "observed_checkpoint_steps": _optional_integer(
+            raw, "observed_checkpoint_steps"
+        ),
         "allow_partial_checkpoint": _boolean(raw, "allow_partial_checkpoint", False),
         "resume_from": _resolve_path(
             resume_value, f"{label}.resume.checkpoint", root, optional=True
@@ -328,24 +334,63 @@ def _parse_pipeline(
         root = cwd_root
     else:
         root = (
-            _resolve_path(configured_root, "paths.project_root", cwd_root, optional=False)
+            _resolve_path(
+                configured_root, "paths.project_root", cwd_root, optional=False
+            )
             if configured_root is not None
             else cwd_root
         )
     assert root is not None
     paths = PathConfig(
         project_root=root,
-        data_root=_resolve_path(paths_raw.get("data_root", "data"), "paths.data_root", root, optional=False),  # type: ignore[arg-type]
-        artifact_root=_resolve_path(paths_raw.get("artifact_root", "artifacts"), "paths.artifact_root", root, optional=False),  # type: ignore[arg-type]
-        output_root=_resolve_path(paths_raw.get("output_root", "outputs"), "paths.output_root", root, optional=False),  # type: ignore[arg-type]
-        unlabeled_manifest=_resolve_path(paths_raw.get("unlabeled_manifest"), "paths.unlabeled_manifest", root, optional=True),
-        robot_action_manifest=_resolve_path(paths_raw.get("robot_action_manifest"), "paths.robot_action_manifest", root, optional=True),
-        base_acwm=_resolve_path(paths_raw.get("base_acwm"), "paths.base_acwm", root, optional=True),
-        lam_init=_resolve_path(paths_raw.get("lam_init"), "paths.lam_init", root, optional=True),
-        stage1_lam=_resolve_path(paths_raw.get("stage1_lam", paths_raw.get("debiased_lam")), "paths.stage1_lam", root, optional=True),
-        stage2_acwm=_resolve_path(paths_raw.get("stage2_acwm"), "paths.stage2_acwm", root, optional=True),
-        bridge_bundle=_resolve_path(paths_raw.get("bridge_bundle"), "paths.bridge_bundle", root, optional=True),
-        stage3_acwm=_resolve_path(paths_raw.get("stage3_acwm"), "paths.stage3_acwm", root, optional=True),
+        data_root=_resolve_path(
+            paths_raw.get("data_root", "data"), "paths.data_root", root, optional=False
+        ),  # type: ignore[arg-type]
+        artifact_root=_resolve_path(
+            paths_raw.get("artifact_root", "artifacts"),
+            "paths.artifact_root",
+            root,
+            optional=False,
+        ),  # type: ignore[arg-type]
+        output_root=_resolve_path(
+            paths_raw.get("output_root", "outputs"),
+            "paths.output_root",
+            root,
+            optional=False,
+        ),  # type: ignore[arg-type]
+        unlabeled_manifest=_resolve_path(
+            paths_raw.get("unlabeled_manifest"),
+            "paths.unlabeled_manifest",
+            root,
+            optional=True,
+        ),
+        robot_action_manifest=_resolve_path(
+            paths_raw.get("robot_action_manifest"),
+            "paths.robot_action_manifest",
+            root,
+            optional=True,
+        ),
+        base_acwm=_resolve_path(
+            paths_raw.get("base_acwm"), "paths.base_acwm", root, optional=True
+        ),
+        lam_init=_resolve_path(
+            paths_raw.get("lam_init"), "paths.lam_init", root, optional=True
+        ),
+        stage1_lam=_resolve_path(
+            paths_raw.get("stage1_lam", paths_raw.get("debiased_lam")),
+            "paths.stage1_lam",
+            root,
+            optional=True,
+        ),
+        stage2_acwm=_resolve_path(
+            paths_raw.get("stage2_acwm"), "paths.stage2_acwm", root, optional=True
+        ),
+        bridge_bundle=_resolve_path(
+            paths_raw.get("bridge_bundle"), "paths.bridge_bundle", root, optional=True
+        ),
+        stage3_acwm=_resolve_path(
+            paths_raw.get("stage3_acwm"), "paths.stage3_acwm", root, optional=True
+        ),
     )
 
     runtime_raw = _mapping(raw.get("runtime", {}), "runtime")
@@ -367,8 +412,14 @@ def _parse_pipeline(
         root=root,
     )
     objectives = _mapping(stage1_raw.get("objectives", {}), "stage1.objectives")
-    emb = _mapping(objectives.get("embodiment_centric_reconstruction", {}), "stage1.objectives.embodiment_centric_reconstruction")
-    cal = _mapping(objectives.get("latent_space_calibration", {}), "stage1.objectives.latent_space_calibration")
+    emb = _mapping(
+        objectives.get("embodiment_centric_reconstruction", {}),
+        "stage1.objectives.embodiment_centric_reconstruction",
+    )
+    cal = _mapping(
+        objectives.get("latent_space_calibration", {}),
+        "stage1.objectives.latent_space_calibration",
+    )
     stage1 = Stage1Config(
         **stage1_base,
         latent_dim=_integer(stage1_raw, "latent_dim", LATENT_DIM, minimum=1),
@@ -403,10 +454,14 @@ def _parse_pipeline(
     if stage2.latent_dim != LATENT_DIM:
         raise ConfigError(f"stage2.latent_dim must be {LATENT_DIM}")
     if stage2.training_scope != "D":
-        raise ConfigError("stage2.training_scope must be 'D' for production CD-LAM training")
+        raise ConfigError(
+            "stage2.training_scope must be 'D' for production CD-LAM training"
+        )
 
     bridge_raw = _mapping(raw.get("bridge_training", {}), "bridge_training")
-    legacy_bridge = _mapping(_mapping(raw.get("stage3", {}), "stage3").get("bridge", {}), "stage3.bridge")
+    legacy_bridge = _mapping(
+        _mapping(raw.get("stage3", {}), "stage3").get("bridge", {}), "stage3.bridge"
+    )
     merged_bridge = dict(legacy_bridge)
     merged_bridge.update(bridge_raw)
     bridge_action_dim = _integer(merged_bridge, "action_dim", ACTION_DIM, minimum=1)
@@ -420,7 +475,8 @@ def _parse_pipeline(
             default_steps=1000,
             default_batch=32,
             default_lr=1e-3,
-            adapter=_optional_string(adapters, "bridge") or _optional_string(adapters, "bridge_train"),
+            adapter=_optional_string(adapters, "bridge")
+            or _optional_string(adapters, "bridge_train"),
             root=root,
         ),
         action_dim=bridge_action_dim,
@@ -448,7 +504,12 @@ def _parse_pipeline(
         latent_dim=latent_dim,
         action_transform_id=_optional_string(stage3_raw, "action_transform_id"),
         source_stride=_optional_integer(stage3_raw, "source_stride"),
-        working_directory=_resolve_path(stage3_raw.get("working_directory"), "stage3.working_directory", root, optional=True),
+        working_directory=_resolve_path(
+            stage3_raw.get("working_directory"),
+            "stage3.working_directory",
+            root,
+            optional=True,
+        ),
     )
 
     return PipelineConfig(
@@ -477,7 +538,9 @@ def load_pipeline_config(
     try:
         payload = yaml.safe_load(config_path.read_text(encoding="utf-8"))
     except Exception as exc:
-        raise ConfigError(f"failed to parse configuration {config_path}: {exc}") from exc
+        raise ConfigError(
+            f"failed to parse configuration {config_path}: {exc}"
+        ) from exc
     resolution_root = config_path.parent if project_root is None else project_root
     effective = _apply_path_environment(_mapping(payload, "pipeline"))
     return _parse_pipeline(

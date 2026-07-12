@@ -53,7 +53,14 @@ For paired `(o_t, u_t, o_{t+1})` data, a lightweight bridge maps an aligned
 **22D robot-action transition** `u_t` to the **32D debiased latent action**.
 In the paper's AgiBot Alpha pipeline, this input is
 `absolute_action[t + 4] - absolute_action[t]` with ordering arm 14, grippers 2,
-head 2, waist 2, and base 2:
+head 2, waist 2, and robot velocity 2:
+
+`absolute_action` is assembled from the publisher's independent
+`action/joint/position`, `action/effector/position`, `action/head/position`,
+`action/waist/position`, and `action/robot/velocity` arrays. Robot state is
+kept as observation data; it is not substituted for commands. The public
+converter applies no implicit unit conversion and fails when any command array
+is absent.
 
 ```text
 u_norm = (u_t - action_mean) / action_std
@@ -78,6 +85,8 @@ reject missing statistics or mismatched shapes.
 
 Final paper checkpoints: **3,000 optimizer updates for 2B** and **6,000 for
 14B**. Stage 3 is evaluated on 300 AgiBot clips drawn from distinct episodes.
+See [`EVALUATION.md`](EVALUATION.md) for the runnable FDCE scoring workflow and
+[`EVAL_PROTOCOL.md`](EVAL_PROTOCOL.md) for the full paper evaluation contract.
 
 ## Main training budgets
 
@@ -93,20 +102,40 @@ other hardware.
 
 ## Validating a release configuration
 
-The portable protocol configs are
-[`pipeline_100h_2b.yaml`](../configs/pipeline_100h_2b.yaml) and
-[`pipeline_100h_14b.yaml`](../configs/pipeline_100h_14b.yaml). After filling
-their required asset fields locally, validate every configured path with:
+The concrete 2B runtime is configured with
+[`runtime.example.json`](../configs/runtime.example.json). Copy it to the
+ignored `configs/runtime.json`, fill the model and data paths, create the pinned
+isolated model environment and staged ACWM source, and validate every real
+stage with:
 
 ```bash
-bash scripts/run.sh doctor \
-  --strict \
-  --config configs/pipeline_100h_2b.yaml
+CDLAM_ACCEPT_BASE_LICENSE=yes bash scripts/bootstrap_model_runtime.sh
+python scripts/model_runtime_doctor.py --check-driver
+bash scripts/run.sh runtime-doctor --stage all
+bash scripts/run.sh pipeline --dry-run
 ```
 
-The Hugging Face release provides tensor-exact 2B research checkpoint lineages.
-The source release provides typed stage commands, an optimizer-based CPU
-integration backend, and a production adapter interface. Real adapters fail
-closed while the matching base model, data, or other required assets are
-absent; the repository does not claim end-to-end paper reproduction from a
-source-only clone. See [`TRAINING.md`](TRAINING.md).
+After those gates pass and a GPU is reserved, the one-command real launch is:
+
+```bash
+bash scripts/run.sh pipeline --allow-gpu
+```
+
+That command binds the newly produced Stage-1 checkpoint into both bridge
+training and Stage 2, then binds the new bridge and Stage-2 checkpoint into
+Stage 3. Individual stage commands use the parent assets declared in the same
+runtime profile. The portable
+[`pipeline_100h_2b.yaml`](../configs/pipeline_100h_2b.yaml) and
+[`pipeline_100h_14b.yaml`](../configs/pipeline_100h_14b.yaml) remain protocol
+and custom-backbone planning templates; the bundled real wrapper is 2B-only.
+
+The locally verified compact Hugging Face snapshot prepares three main
+tensor-exact 2B research entries; its LAM/pretrain pair and separate 100h
+posttrain entry must not be treated as one direct lineage. Publication to an
+immutable Hugging Face revision is still pending.
+The source release provides typed planners, an optimizer-based CPU integration
+backend, pinned 2B launch wrappers, and a manifest-checked integration overlay.
+The runtime fails closed while the matching base model, data, or other required
+assets are absent. A source-only clone is therefore sufficient for validation
+and synthetic integration, but not for paper-model training or headline-table
+reproduction. See [`TRAINING.md`](TRAINING.md).

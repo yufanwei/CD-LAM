@@ -14,6 +14,7 @@ if [[ -x "${CDLAM_VENV:-$ROOT/.venv}/bin/python" ]]; then
 else
   PY="${PYTHON:-python3}"
 fi
+RUNTIME_CONFIG="${CDLAM_RUNTIME_CONFIG:-$ROOT/configs/runtime.json}"
 
 run_lint() {
   local venv_ruff="${CDLAM_VENV:-$ROOT/.venv}/bin/ruff"
@@ -36,10 +37,18 @@ Commands:
   train-smoke        Run Stage 1, Stage 2, bridge, and Stage 3 CPU training smoke.
   data-prepare       Build all staged manifests from episode JSONL metadata.
   data-validate      Validate staged manifest schemas and alignment.
-  stage1             Plan or run Stage-1 training.
-  stage2             Plan or run Stage-2 training.
-  bridge-train       Plan or run action-to-latent bridge training.
-  stage3             Plan or run Stage-3 training.
+  score-fdce        Score protocol-compatible foreground track bundles.
+  prepare-agibot     Materialize raw AgiBot episodes, convert, and build bridge data.
+  runtime-doctor     Validate the real-training runtime and local assets.
+  stage1             Run real Stage-1 LAM training.
+  bridge             Run real action-to-latent bridge training.
+  stage2             Run real Stage-2 world-model pretraining.
+  stage3             Run real Stage-3 robot-action post-training.
+  pipeline           Run Stage 1, bridge, Stage 2, and Stage 3 in sequence.
+  plan-stage1        Print or run the lightweight Stage-1 planner.
+  plan-bridge        Print or run the lightweight bridge planner.
+  plan-stage2        Print or run the lightweight Stage-2 planner.
+  plan-stage3        Print or run the lightweight Stage-3 planner.
   test               Run the unit-test suite.
   lint               Run Ruff source checks.
   check              Run all CPU source-release gates.
@@ -62,7 +71,15 @@ case "$command" in
   train-smoke) "$PY" -m cd_lam train-smoke "$@" ;;
   data-prepare) "$PY" -m cd_lam data-prepare "$@" ;;
   data-validate) "$PY" -m cd_lam data-validate "$@" ;;
-  stage1|stage2|bridge-train|stage3) "$PY" -m cd_lam "$command" "$@" ;;
+  score-fdce) "$PY" -m cd_lam score-fdce "$@" ;;
+  prepare-agibot) "$PY" "$ROOT/scripts/prepare_agibot.py" --repo-root "$ROOT" "$@" ;;
+  runtime-doctor) "$PY" -m cdlam_runtime --config "$RUNTIME_CONFIG" doctor "$@" ;;
+  stage1|bridge|stage2|stage3|pipeline)
+    "$PY" -m cdlam_runtime --config "$RUNTIME_CONFIG" "$command" "$@" ;;
+  plan-stage1) "$PY" -m cd_lam stage1 "$@" ;;
+  plan-bridge|bridge-train) "$PY" -m cd_lam bridge-train "$@" ;;
+  plan-stage2) "$PY" -m cd_lam stage2 "$@" ;;
+  plan-stage3) "$PY" -m cd_lam stage3 "$@" ;;
   test) "$PY" -m pytest -q "$ROOT/tests" "$@" ;;
   lint) run_lint "$@" ;;
   check) make -C "$ROOT" PYTHON="$PY" check "$@" ;;

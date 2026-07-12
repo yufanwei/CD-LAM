@@ -11,27 +11,45 @@ configs, tests, documentation, and machine-readable paper-result fixtures.
 
 ## Model repository
 
-<https://huggingface.co/yufanwei/CD-LAM> contains the tensor-exact 2B research
-checkpoint release. The 100h and 1000h lineages each include a Stage-1 LAM,
-Stage-2 and Stage-3 ACWM overlays, and a matching bridge. No trained checkpoint
-is bundled with this source tree; `asset_manifest.json` in the model repository
-is authoritative for filenames, roles, sizes, SHA-256 values, and lineage.
+The prepared compact snapshot for
+<https://huggingface.co/yufanwei/CD-LAM> contains exactly three main
+tensor-exact 2B research entries. It is locally verified but has not yet
+replaced the legacy layout on the current Hugging Face `main`:
 
-`bash scripts/run.sh download-models` fails closed until the snapshot contains
-a tensor-exact `asset_manifest.json` with at least one released asset. Selective
-`--allow-pattern` downloads always include that manifest and must match a
-declared asset path; downloaded files are checked against their recorded size
-and SHA-256.
+| entry | path | role |
+|---|---|---|
+| LAM | `models/lam/model.pt` | selected masked 32D latent-action model |
+| pretrain | `models/pretrain/model.pt` | pretrained ACWM overlay compatible with the compact LAM |
+| posttrain 100h | `models/posttrain-100h/model.pt` | selected robot-action posttraining overlay |
+
+`models/posttrain-100h/` also contains `bridge.pt` and
+`action_contract.json`. They are compatibility auxiliaries for the posttrained
+entry, not additional main models. No trained checkpoint is bundled with this
+source tree; `asset_manifest.json` in the model repository is authoritative
+for filenames, roles, sizes, SHA-256 values, and lineage.
+
+The LAM and pretrain entries form one compatible pair. The posttrain entry was
+trained in a separate 100h latent space and is bound to the colocated bridge.
+Do not load all three as a sequential pipeline or substitute the public LAM
+for the posttrain entry's recorded latent-space identity.
+
+`bash scripts/run.sh download-models` fails closed until an immutable snapshot
+contains release ID `cd-lam-2b-three-entry`, the exact three model identities,
+the two required posttraining auxiliaries, a pinned public runtime, a pinned
+base model, and a tensor-exact manifest. Selective `--allow-pattern` downloads
+always include that manifest and must match a declared asset path; downloaded
+files are checked against their recorded size and SHA-256.
 
 ## Included versus external
 
 | artifact | source release | external availability |
 |---|---:|---:|
 | loss, action-transform, bridge, and evaluation primitives | yes | no |
-| typed stage runners and synthetic optimizer/checkpoint smoke | yes | no |
-| portable protocol configs, adapter interface, and asset validation | yes | no |
+| typed stage planners and synthetic optimizer/checkpoint smoke | yes | no |
+| pinned 2B launch wrappers and manifest-checked source overlay | yes | complete upstream source is staged outside Git |
+| portable protocol configs, custom-backbone interface, and asset validation | yes | no |
 | exact paper tables as JSON | yes | no |
-| 2B CD-LAM research checkpoints | no | released on Hugging Face |
+| three main 2B CD-LAM research entries | no | compact snapshot prepared; publication pending |
 | 14B CD-LAM checkpoints | no | not released |
 | base 2B/14B backbones | no | user-supplied under upstream terms |
 | Cosmos video tokenizer and text encoder | no | pinned gated NVIDIA assets |
@@ -51,7 +69,7 @@ The current quickstart checks code primitives, action algebra, bridge
 serialization, typed plans, real CPU optimizer/checkpoint/resume paths, and
 dependency gates. Downloaded release files are additionally checked against
 the tensor-exact manifest. End-to-end paper reproduction still requires the
-compatible base checkpoint, datasets, a pinned production adapter and GPU
-environment, and all training correctness gates; the model card explicitly
+compatible base checkpoint, datasets, the staged pinned 2B runtime, a suitable
+GPU environment, and all training correctness gates; the model card explicitly
 qualifies which released research assets are not verified headline-table
 reproductions.

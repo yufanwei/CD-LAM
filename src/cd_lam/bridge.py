@@ -102,13 +102,17 @@ def _as_vector(value: Any, *, name: str, length: int) -> Tensor:
         )
     vector = vector.detach().to(device="cpu", dtype=torch.float32).clone()
     if not bool(torch.isfinite(vector).all()):
-        raise BridgeCheckpointError(f"checkpoint field {name!r} contains NaN or infinity")
+        raise BridgeCheckpointError(
+            f"checkpoint field {name!r} contains NaN or infinity"
+        )
     return vector
 
 
 def _validate_g_state(value: Any) -> Mapping[str, Tensor]:
     if not isinstance(value, Mapping):
-        raise BridgeCheckpointError("checkpoint field 'g_state' must be a state-dict mapping")
+        raise BridgeCheckpointError(
+            "checkpoint field 'g_state' must be a state-dict mapping"
+        )
 
     expected = set(_G_STATE_SHAPES)
     actual = set(value)
@@ -147,7 +151,9 @@ def _validate_g_state(value: Any) -> Mapping[str, Tensor]:
     return state
 
 
-def validate_bridge_checkpoint(checkpoint: Mapping[str, Any]) -> ValidatedBridgeCheckpoint:
+def validate_bridge_checkpoint(
+    checkpoint: Mapping[str, Any],
+) -> ValidatedBridgeCheckpoint:
     """Validate and normalize an in-memory bridge checkpoint.
 
     Extra top-level metadata is retained because released training checkpoints
@@ -180,17 +186,25 @@ def validate_bridge_checkpoint(checkpoint: Mapping[str, Any]) -> ValidatedBridge
         )
 
     g_state = _validate_g_state(checkpoint["g_state"])
-    action_mean = _as_vector(checkpoint["action_mean"], name="action_mean", length=ACTION_DIM)
-    action_std = _as_vector(checkpoint["action_std"], name="action_std", length=ACTION_DIM)
+    action_mean = _as_vector(
+        checkpoint["action_mean"], name="action_mean", length=ACTION_DIM
+    )
+    action_std = _as_vector(
+        checkpoint["action_std"], name="action_std", length=ACTION_DIM
+    )
     zm = _as_vector(checkpoint["zm"], name="zm", length=LATENT_DIM)
     zsd = _as_vector(checkpoint["zsd"], name="zsd", length=LATENT_DIM)
 
     if bool((action_std <= 0).any()):
-        raise BridgeCheckpointError("checkpoint field 'action_std' must be strictly positive")
+        raise BridgeCheckpointError(
+            "checkpoint field 'action_std' must be strictly positive"
+        )
     if bool((zsd <= 0).any()):
         raise BridgeCheckpointError("checkpoint field 'zsd' must be strictly positive")
 
-    metadata = {key: value for key, value in checkpoint.items() if key not in _REQUIRED_FIELDS}
+    metadata = {
+        key: value for key, value in checkpoint.items() if key not in _REQUIRED_FIELDS
+    }
     return ValidatedBridgeCheckpoint(
         g_state=g_state,
         action_mean=action_mean,
@@ -224,11 +238,15 @@ def load_bridge_checkpoint(source: CheckpointSource) -> ValidatedBridgeCheckpoin
 
     path = Path(source)
     if not path.is_file():
-        raise FileNotFoundError(f"bridge checkpoint does not exist or is not a file: {path}")
+        raise FileNotFoundError(
+            f"bridge checkpoint does not exist or is not a file: {path}"
+        )
     try:
         checkpoint = torch.load(path, map_location="cpu", weights_only=False)
     except Exception as exc:
-        raise BridgeCheckpointError(f"failed to load bridge checkpoint {path}: {exc}") from exc
+        raise BridgeCheckpointError(
+            f"failed to load bridge checkpoint {path}: {exc}"
+        ) from exc
     return validate_bridge_checkpoint(checkpoint)
 
 
@@ -282,7 +300,9 @@ class ActionToLatentBridge(nn.Module):
 
     def _validate_action(self, action: Tensor) -> None:
         if not isinstance(action, Tensor):
-            raise TypeError(f"action must be a torch.Tensor, got {type(action).__name__}")
+            raise TypeError(
+                f"action must be a torch.Tensor, got {type(action).__name__}"
+            )
         if action.ndim < 1 or action.shape[-1] != ACTION_DIM:
             raise ValueError(
                 f"action must have shape (..., {ACTION_DIM}), got {tuple(action.shape)}"
@@ -304,7 +324,8 @@ class ActionToLatentBridge(nn.Module):
         checkpoint.update(
             {
                 "g_state": OrderedDict(
-                    (key, value.detach().cpu().clone()) for key, value in self.g.state_dict().items()
+                    (key, value.detach().cpu().clone())
+                    for key, value in self.g.state_dict().items()
                 ),
                 "action_mean": self.action_mean.detach().cpu().clone(),
                 "action_std": self.action_std.detach().cpu().clone(),
@@ -350,7 +371,9 @@ def prepare_latent_condition(
     if latent_route:
         assert latent is not None
         if not isinstance(latent, Tensor):
-            raise TypeError(f"latent must be a torch.Tensor, got {type(latent).__name__}")
+            raise TypeError(
+                f"latent must be a torch.Tensor, got {type(latent).__name__}"
+            )
         if latent.ndim < 1 or latent.shape[-1] != LATENT_DIM:
             raise ValueError(
                 f"latent must have shape (..., {LATENT_DIM}), got {tuple(latent.shape)}"
@@ -365,8 +388,7 @@ def prepare_latent_condition(
         raise ValueError("robot_action and bridge must be provided together")
     if not isinstance(bridge, ActionToLatentBridge):
         raise TypeError(
-            "bridge must be an ActionToLatentBridge, "
-            f"got {type(bridge).__name__}"
+            f"bridge must be an ActionToLatentBridge, got {type(bridge).__name__}"
         )
     condition = bridge(robot_action)
     if condition.ndim < 1 or condition.shape[-1] != LATENT_DIM:

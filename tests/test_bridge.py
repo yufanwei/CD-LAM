@@ -20,7 +20,9 @@ def synthetic_checkpoint() -> dict:
     torch.manual_seed(7)
     model = build_bridge_mlp()
     return {
-        "g_state": OrderedDict((key, value.detach().clone()) for key, value in model.state_dict().items()),
+        "g_state": OrderedDict(
+            (key, value.detach().clone()) for key, value in model.state_dict().items()
+        ),
         "action_mean": torch.linspace(-1.0, 1.0, ACTION_DIM),
         "action_std": torch.linspace(0.5, 1.5, ACTION_DIM),
         "zm": torch.linspace(-0.2, 0.2, LATENT_DIM),
@@ -37,10 +39,14 @@ def test_bridge_synthetic_checkpoint_file_roundtrip(tmp_path) -> None:
 
     bridge = ActionToLatentBridge.from_checkpoint(path)
     action = torch.linspace(-2.0, 2.0, 2 * 3 * ACTION_DIM).reshape(2, 3, ACTION_DIM)
-    expected_normalized = (action - checkpoint["action_mean"]) / checkpoint["action_std"]
+    expected_normalized = (action - checkpoint["action_mean"]) / checkpoint[
+        "action_std"
+    ]
     expected = build_bridge_mlp()
     expected.load_state_dict(checkpoint["g_state"], strict=True)
-    expected_latent = expected(expected_normalized) * checkpoint["zsd"] + checkpoint["zm"]
+    expected_latent = (
+        expected(expected_normalized) * checkpoint["zsd"] + checkpoint["zm"]
+    )
 
     actual = bridge(action)
     assert actual.shape == (2, 3, LATENT_DIM)
@@ -58,7 +64,9 @@ def test_bridge_accepts_one_action_vector() -> None:
     assert bridge(torch.zeros(ACTION_DIM)).shape == (LATENT_DIM,)
 
 
-@pytest.mark.parametrize("missing", ["g_state", "action_mean", "action_std", "zm", "zsd", "latent_dim"])
+@pytest.mark.parametrize(
+    "missing", ["g_state", "action_mean", "action_std", "zm", "zsd", "latent_dim"]
+)
 def test_bridge_validator_requires_full_contract(missing: str) -> None:
     checkpoint = synthetic_checkpoint()
     del checkpoint[missing]
@@ -108,7 +116,13 @@ def test_prepare_latent_condition_supports_both_exclusive_routes() -> None:
     "kwargs,match",
     [
         ({}, "exactly one"),
-        ({"latent": torch.zeros(LATENT_DIM), "robot_action": torch.zeros(ACTION_DIM)}, "exactly one"),
+        (
+            {
+                "latent": torch.zeros(LATENT_DIM),
+                "robot_action": torch.zeros(ACTION_DIM),
+            },
+            "exactly one",
+        ),
         ({"robot_action": torch.zeros(ACTION_DIM)}, "provided together"),
         ({"bridge": object()}, "provided together"),
         (
@@ -118,7 +132,9 @@ def test_prepare_latent_condition_supports_both_exclusive_routes() -> None:
         ({"latent": torch.zeros(31)}, r"shape \(\.\.\., 32\)"),
     ],
 )
-def test_prepare_latent_condition_rejects_ambiguous_or_invalid_routes(kwargs, match) -> None:
+def test_prepare_latent_condition_rejects_ambiguous_or_invalid_routes(
+    kwargs, match
+) -> None:
     with pytest.raises((TypeError, ValueError), match=match):
         prepare_latent_condition(**kwargs)
 

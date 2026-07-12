@@ -15,7 +15,9 @@ def test_doctor_strict_bootstrap_does_not_require_weights(capsys) -> None:
     assert "CD-LAM doctor: PASS" in output
 
 
-def test_doctor_strict_checks_only_explicitly_configured_assets(tmp_path, capsys) -> None:
+def test_doctor_strict_checks_only_explicitly_configured_assets(
+    tmp_path, capsys
+) -> None:
     config = tmp_path / "profile.json"
     config.write_text(
         '{"paths": {"data_root": "data", "lam_init": null, '
@@ -34,9 +36,9 @@ def test_doctor_strict_checks_only_explicitly_configured_assets(tmp_path, capsys
 
 def test_doctor_strict_accepts_public_null_asset_configs(capsys) -> None:
     for name in ("pipeline_100h_2b.yaml", "pipeline_100h_14b.yaml"):
-        assert main(
-            ["doctor", "--strict", "--config", str(ROOT / "configs" / name)]
-        ) == 0
+        assert (
+            main(["doctor", "--strict", "--config", str(ROOT / "configs" / name)]) == 0
+        )
         output = capsys.readouterr().out
         assert "no local full-runtime assets are configured" in output
         assert "CD-LAM doctor: PASS" in output

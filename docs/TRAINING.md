@@ -1,75 +1,93 @@
-# Training and adapters
+# Training runtime
 
-CD-LAM separates method logic from model-specific infrastructure. The public
-package owns configuration, stage ordering, action semantics, checkpoint
-lineage, and validation. A production adapter owns the concrete LAM/ACWM model,
-distributed launcher, dataset objects, and model checkpoint format.
+CD-LAM separates stable public commands from the pinned model implementation.
+The release owns configuration, stage ordering, action semantics, checkpoint
+lineage, validators, and the concrete 2B launch wrappers. The staged ACWM tree
+is built from one pinned upstream commit plus the small manifest-checked overlay
+under `third_party/acwm_overlay/`.
 
 ## Execution modes
 
 | mode | purpose | evidence it provides |
 |---|---|---|
-| `--dry-run` | resolve a typed plan without writing files | paths, assets, adapter, steps, device, action contract, blockers |
+| `runtime-doctor` | validate the complete real runtime without training | executables, source closure, local models/data, imports, action contract |
+| `pipeline --dry-run` | print all real launch commands without GPU work | resolved paths, steps, devices, and subprocess routing |
 | `--synthetic` | run deterministic tiny PyTorch models on CPU | backward, optimizer, checkpoint, resume, and stage-lineage integration |
-| external adapter | run a configured real model stack | adapter-defined GPU training and artifact evidence |
+| real stage or pipeline | run the pinned 2B implementation | real GPU updates, stage validators, and bound output lineage |
 
 Synthetic mode is an integration test. It does not estimate paper quality or
 memory requirements.
 
+Build and validate the separate locked CUDA environment before a real stage;
+see [Reproducible 2B model environment](MODEL_RUNTIME.md). The core `.venv`
+remains the default for planning, data preparation, and CPU checks.
+
 ## Commands
 
-Install the package, then use one config for all stages:
+Create one untracked runtime profile for all real stages:
 
 ```bash
-cdlam stage1       --config configs/pipeline_100h_2b.yaml --dry-run
-cdlam stage2       --config configs/pipeline_100h_2b.yaml --dry-run
-cdlam bridge-train --config configs/pipeline_100h_2b.yaml --dry-run
-cdlam stage3       --config configs/pipeline_100h_2b.yaml --dry-run
+cp configs/runtime.example.json configs/runtime.json
+bash scripts/run.sh runtime-doctor --stage all
+bash scripts/run.sh pipeline --dry-run
 ```
 
-A blocked dry run returns exit code 2. This is intentional: CI and launch
-automation must not treat a plan with missing assets or incompatible action
-coordinates as runnable.
+Actual GPU work requires an explicit acknowledgement:
+
+```bash
+bash scripts/run.sh stage1 --allow-gpu
+bash scripts/run.sh bridge --allow-gpu
+bash scripts/run.sh stage2 --allow-gpu
+bash scripts/run.sh stage3 --allow-gpu
+bash scripts/run.sh pipeline --allow-gpu
+```
+
+The full pipeline produces Stage 1 first, uses that exact checkpoint for both
+bridge and Stage 2, binds the new bridge to the action contract, and then uses
+the newly produced Stage-2 state and bridge for Stage 3. A failed stage stops
+the chain. Independent stages require the parent checkpoints declared in the
+profile.
 
 The complete CPU training smoke is one command:
 
 ```bash
-cdlam train-smoke --output-root outputs/train-smoke --steps 2 --json
+.venv/bin/cdlam train-smoke --output-root outputs/train-smoke --steps 2 --json
 ```
 
-Individual synthetic stages are also available:
+Individual synthetic stages and custom planner routes remain available:
 
 ```bash
-cdlam stage1 --config configs/pipeline_100h_2b.yaml \
+.venv/bin/cdlam stage1 --config configs/pipeline_100h_2b.yaml \
   --synthetic --device cpu --steps 2
+bash scripts/run.sh plan-stage1 \
+  --config configs/pipeline_100h_2b.yaml --dry-run --json
 ```
 
 ## Pipeline configuration
 
-Official templates live in `configs/`. Copy one to an ignored local file and
-populate it; do not commit local storage paths or credentials.
+`configs/runtime.example.json` is the real 2B template. Relative paths are
+resolved from `workspace`, itself resolved beside the profile. Do not commit a
+populated profile, storage path, or credential.
 
 Important fields:
 
 | section | contract |
 |---|---|
-| `paths.project_root` | anchor for every relative path; independent of launch CWD |
-| `paths.*manifest` | prepared Stage-1/2 or robot-action data index |
-| `paths.base_acwm`, `paths.lam_init` | initial model assets |
-| `paths.stage1_lam` | exact Stage-1 output consumed by Stage 2 and bridge training |
-| `paths.stage2_acwm`, `paths.bridge_bundle` | exact parents consumed by Stage 3 |
-| `adapters.*` | `python.module:factory_or_instance` integration reference |
-| `optimizer_steps` | total optimizer-update target, not additional steps |
-| `observed_checkpoint_steps` | optional audited step count for a selected partial artifact |
-| `resume` | checkpoint and its completed-step declaration |
-| `action_transform_id`, `source_stride` | semantic bridge/Stage-3 compatibility key |
-| `stage3.working_directory` | explicit external resource root when an integration requires one |
+| `workspace` | anchor for every relative path; independent of launch CWD |
+| `paths.python`, `paths.torchrun` | executables from the separate model environment |
+| `paths.acwm_root` | staged, manifest-verified runtime, normally `.deps/acwm-runtime` |
+| data paths | Stage-1 indices, bridge cache, Stage-2 manifest, and Stage-3 dataset YAML |
+| base paths | exact LAM checkpoint, 2B distributed checkpoint, and local HF cache |
+| independent-stage paths | released or user-supplied Stage-1, bridge, and Stage-2 parents |
+| `stage1`/`bridge`/`stage2`/`stage3` | optimizer budgets, batch sizes, cadence, and evaluation settings |
+| `launch` | visible GPU list, process count, and seed |
 
-Stage 2 requires training scope `D` in the production config. Bridge training
-and Stage 3 must declare identical action-transform IDs and source strides.
-Stage 3 also requires an explicit working directory for an external adapter.
+Stage 2 and Stage 3 use the release-pinned scope and action dimensions. The
+doctor rejects missing data, base files, tokenizer/text-encoder cache entries,
+source adapters, public experiment aliases, or action-contract metadata before
+launch.
 
-## Production adapter interface
+## Custom backbone adapter interface
 
 An adapter subclasses `cd_lam.adapters.StageAdapter`:
 

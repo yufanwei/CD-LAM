@@ -1,0 +1,9 @@
+# Runtime supplements omitted by the pinned upstream project metadata.
+h5py==3.16.0
+lightning==2.6.5
+lightning-utilities==0.15.3
+pytorch-lightning==2.6.5
+torchmetrics==1.9.0
+
+# Source-only dependency used by the AgiBot rotation transforms.
+pytorch3d @ git+https://github.com/facebookresearch/pytorch3d.git@1f7f85c0a3abcce0644f33d32ee911f10a9cac26

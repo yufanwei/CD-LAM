@@ -14,6 +14,14 @@ REQUIRED_PACKAGE_FILES = {
     "cd_lam/data/action.py",
     "cd_lam/data/manifests.py",
     "cd_lam/training/runner.py",
+    "cdlam_runtime/__init__.py",
+    "cdlam_runtime/__main__.py",
+    "cdlam_runtime/cli.py",
+    "cdlam_runtime/runtime.py",
+    "cdlam_runtime/entries/stage1.py",
+    "cdlam_runtime/entries/stage2.py",
+    "cdlam_runtime/entries/stage3.py",
+    "cdlam_runtime/support/Scale/common/shard_io.py",
 }
 
 

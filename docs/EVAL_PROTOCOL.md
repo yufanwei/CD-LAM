@@ -4,6 +4,30 @@ The paper separates Stage-1 representation audits, Stage-2 latent-action
 rollouts, and Stage-3 robot-action rollouts. Results from different protocols
 must not be pooled.
 
+> **Reproduction status:** the NumPy reducer in `cd_lam.metrics.fdce` implements
+> the manuscript's fixed-track-pair Eq. A.3 followed by symmetric Chamfer Eq.
+> A.4. The historical artifact pipeline used for the transcribed headline
+> tables instead computed a Chamfer reduction independently at each frame and
+> then averaged over time. These operations are not equivalent. A crossing
+> trajectory fixture gives 5.0 with the manuscript reducer and approximately
+> zero with the historical order. The released table values are therefore not
+> canonical-code recomputations until the frozen populations are rescored with
+> this module.
+
+The release does not yet contain the exact 300-clip Stage-2 and Stage-3
+population manifests, donor mapping, or a complete rollout-to-SAM3-to-
+CoWTracker runner. `configs/eval_paper.yaml` is a normative protocol template,
+not a frozen evaluation index. Comparable results must record episode and
+window IDs, timestamps, donor IDs, seeds, crop and resolution, dependency
+revisions, expected count, valid count, and every failure.
+
+Once protocol-compatible tracks exist, the reducer is executable rather than
+descriptive. Run `bash scripts/run.sh score-fdce` with `--tracks` and
+`--output`; it accepts only 49-frame NPZ bundles with at most 16 anchors per
+side by default, hashes every input, and writes per-sample plus mean/median
+results. See [Evaluation](EVALUATION.md). This closes metric reduction, not the
+missing frozen-population or rollout-generation boundary.
+
 ## Foreground Displacement Chamfer Error (FDCE)
 
 FDCE measures action following from foreground displacement tracks rather than
@@ -115,3 +139,7 @@ versions, mask/track validity counts, image resolution, seed, and aggregation
 logic. Exact paper reproduction additionally requires a checkpoint explicitly
 verified for the corresponding table and the original evaluation assets. The
 released 2B research files do not by themselves satisfy that requirement.
+Historical Beta results decoded through the old `torchvision_av` fallback are
+invalid because strided timestamp requests collapsed to consecutive frames.
+The source validator and pinned patch reject that implementation. At 30 FPS,
+50 stride-four requests must span about 6.533 seconds, not 1.633 seconds.

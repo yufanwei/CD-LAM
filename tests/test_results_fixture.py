@@ -12,9 +12,7 @@ from validate_results import validate  # noqa: E402
 
 
 def test_paper_results_fixture() -> None:
-    payload = json.loads(
-        (ROOT / "docs" / "results" / "paper_results.json").read_text()
-    )
+    payload = json.loads((ROOT / "docs" / "results" / "paper_results.json").read_text())
     assert validate(payload) == {
         "table_i": 7,
         "table_ii": 4,

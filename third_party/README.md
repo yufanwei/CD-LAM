@@ -1,8 +1,12 @@
 # External dependencies
 
-CD-LAM does not vendor its ACWM backbone, SAM3, or CoWTracker. Their pinned
-source revisions and license names are recorded in
+CD-LAM does not vendor the complete ACWM backbone, SAM3, or CoWTracker. Their
+pinned source revisions and license names are recorded in
 [`dependencies.lock.json`](dependencies.lock.json).
+
+The repository does include a sub-1-MiB, source-only ACWM integration overlay
+under [`acwm_overlay/`](acwm_overlay/). It is hash-bound to the pinned NVIDIA
+source revision and contains no model or dataset payloads.
 
 The lock also records gated model assets used by the production stack. Entries
 with `fetch_mode: manual` must be obtained from their model repositories after
@@ -24,6 +28,16 @@ license of CD-LAM does not override any external license.
 The fetch script applies a small H100/B200 and newer-`timm` compatibility patch
 after checking out the pinned CoWTracker revision. That patch is a modification
 of CoWTracker and remains subject to CoWTracker's license.
+
+Fetch the pinned ACWM source and stage the verified CD-LAM runtime separately:
+
+```bash
+CDLAM_ACCEPT_BASE_LICENSE=yes bash scripts/fetch_optional_deps.sh base
+```
+
+The unmodified checkout is stored at `.deps/acwm-base-source`; the staged
+runtime is stored at `.deps/acwm-runtime`. Re-running the command verifies the
+existing runtime instead of silently overwriting it.
 
 The baseline name is retained in the dependency URL and scientific results
 for transparent attribution. It is not used as CD-LAM's package name or

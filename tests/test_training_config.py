@@ -63,7 +63,10 @@ def test_config_paths_resolve_from_config_directory_and_cli_override(tmp_path) -
 
 def test_config_digest_is_stable(tmp_path) -> None:
     config_path = _write_config(tmp_path / "configs" / "pipeline.yaml")
-    assert load_pipeline_config(config_path).digest == load_pipeline_config(config_path).digest
+    assert (
+        load_pipeline_config(config_path).digest
+        == load_pipeline_config(config_path).digest
+    )
 
 
 def test_exported_path_profile_overrides_yaml_and_digest(tmp_path, monkeypatch) -> None:

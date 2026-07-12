@@ -47,17 +47,13 @@ def test_portable_fixture_builds_every_stage_and_preserves_test_split(tmp_path) 
 
 def test_episode_metadata_rejects_nonfinite_fps(tmp_path) -> None:
     source = tmp_path / "bad.jsonl"
-    source.write_text(
-        '{"episode_id":"bad","split":"train","num_frames":2,"fps":NaN}\n'
-    )
+    source.write_text('{"episode_id":"bad","split":"train","num_frames":2,"fps":NaN}\n')
     with pytest.raises(DataContractError, match="fps must be finite"):
         prepare_episode_manifests(source, tmp_path / "out")
 
 
 def test_stage3_validator_rejects_reordered_transition(tmp_path) -> None:
-    prepare_episode_manifests(
-        ROOT / "tests" / "fixtures" / "episodes.jsonl", tmp_path
-    )
+    prepare_episode_manifests(ROOT / "tests" / "fixtures" / "episodes.jsonl", tmp_path)
     path = tmp_path / "stage3_windows.jsonl"
     rows = _jsonl(path)
     rows[0]["transition_indices"][0] = [0, 8]

@@ -1,0 +1,480 @@
+# LAM Registry — single source of truth for every LAM checkpoint we evaluate.
+#
+# Each entry must have:
+#   ckpt_path     — absolute path on disk (one of the formats below).
+#   ckpt_format   — one of:
+#                     official       (HuggingFace-style LAM_400k.ckpt; Lightning module state_dict
+#                                     keyed at lam.lam.* directly under top-level state_dict)
+#                     finetune_ddp   (our finetune output: ckpt['state_dict'] with leading
+#                                     "module." / "encoder." prefixes from DDP+TripleEncoderWrapper.
+#                                     Falls back to "official" base for any missing keys, so the
+#                                     finetune ckpt only needs to contain the trainable subset.)
+#                     latent_action_state_dict
+#                                    (joint-trained LAM: ckpt = {"lam": sd, "heads": ..., "step": N}
+#                                     where `sd` is a FULL LatentActionModel state_dict keyed at the
+#                                     inner level ("action_prompt"/"encoder.*"/"decoder.*"/"fc.*").
+#                                     Loader prefixes each key with "lam.lam." and overlays it on the
+#                                     official base. Optional `state_key` (default "lam") selects the
+#                                     sub-dict. This is the format produced by training_scope/LAM joint
+#                                     trainers and consumed by their probes via load_init_ckpt.)
+#   base_ckpt     — only for finetune_ddp: which official ckpt to merge over (defaults to
+#                   old_lam_400k if omitted).
+#   output_dim    — z dim, must be 32 for ACWM action_vec[352:384] slot.
+#   parent        — registry id of the LAM this one was fine-tuned from, or "none" for base.
+#   status        — see schema in spec §B.2 (LAM-candidate gate verdict).
+#   allowed_for_wm_control — bool. If true, this LAM may enter WM training even if it
+#                            failed the LAM candidate gate. Use this for old_lam_400k:
+#                            it has identity collapse (gate fail) BUT is the LAM the
+#                            upstream 2B pretrained WM was originally trained against,
+#                            so it MUST be available as M1 control for M2 vs M1 comparison.
+#                            The decision is enforced by tools/train_wm_compat.py — gate
+#                            status is informational; this flag is the ACL.
+#   notes         — free-form one-line description.
+
+lams:
+
+  # -------- baselines --------
+  old_lam_400k:
+    ckpt_path: lammodel/checkpoints/DreamDojo/LAM_400k.ckpt
+    ckpt_format: official
+    output_dim: 32
+    parent: none
+    status: lam_gate_failed                 # identity collapse: agibot identity_ratio 0.74
+    allowed_for_wm_control: true            # MUST be allowed — see header comment & §3.5
+    notes: official upstream ACWM LAM, 400k step pretrained — used as M1 WM control
+
+  # -------- v1 same-z camera-clean (current strongest qualifier) --------
+  lam_v1_camera_clean_step9800:
+    ckpt_path: outputs/lam_v1_samez_camera_smoke_8h/checkpoints/step_009800.pt
+    ckpt_format: finetune_ddp
+    base_ckpt: old_lam_400k
+    output_dim: 32
+    parent: old_lam_400k
+    status: qualified_for_wm_smoke
+    allowed_for_wm_control: true            # candidate AND eligible (gate-passing LAM is always allowed)
+    train_data: agibot_35k_bridge_15k
+    notes: same-z 32D, camera/no-op intervention. identity_ratio 0.077 / camera_only_shift3 0.118 / ss_drift_shift3 0.470
+
+  # -------- joint-trained LAM (decoder + siglip heads), v2_dec2 λ_dec=2 (2026-06-04) --------
+  lam_joint_v2dec2:
+    ckpt_path: "New LAM/results/v2_dec2/ckpt_last.pt"
+    ckpt_format: latent_action_state_dict
+    state_key: lam                          # ckpt = {"lam": full LatentActionModel sd, "siglip_head", "heads", "step"}
+    base_ckpt: old_lam_400k                  # official base; ckpt's `lam` sd fully overlays all 839 inner keys
+    output_dim: 32
+    parent: old_lam_400k
+    status: lam_gate_unknown
+    allowed_for_wm_control: true
+    train_data: joint_lam_dec_siglip_v2_dec2
+    notes: Joint-trained LAM (LatentActionModel + decoder + siglip heads), run v2_dec2, λ_dec=2, step 5580 (ckpt_last.pt). z = z_mu (deterministic, 32-D) at lam-resolution 240x320. Registered via new latent_action_state_dict format that prefixes ckpt['lam'] keys with lam.lam. and overlays the official base. Verified build_encoder z matches training-side encode_trunks(build_lam('CD_LAM_BASE').lam) on agibot_beta frame pair.
+
+  # -------- v5.3 pure-ego trained from raw LAM_400k (2026-05-10) --------
+  lam_v5_3_ego_step1499:
+    ckpt_path: outputs/lam_v5_3_train/v5_3_ego_pure_oldinit_1500/checkpoints/step_001499_finetune_ddp.pt
+    ckpt_format: finetune_ddp
+    base_ckpt: old_lam_400k
+    output_dim: 32
+    parent: old_lam_400k
+    status: qualified_for_wm_smoke
+    allowed_for_wm_control: true
+    train_data: egodex_196k_epickitchens_8k
+    notes: v5.3 pure-ego 88min training from raw LAM_400k. EgoDex eval n=300 vs old LAM A — top1 0.677 (+6.3%), top5 0.618 (+10.9%), id_p50 0.039 (-92%), z_norm 3.36 (-45%), PSNR -6.3dB (healthy = z no longer encodes frame copy). Source ckpt step_001499.pt converted via LAM_V5_3/tools/convert_v5_3_to_finetune_ddp.py (839 keys full state_dict).
+
+  # -------- v6.1-A no-mask, 900-step DDP4 finetune from old_lam_400k (2026-05-14) --------
+  lam_v6_1_A_step899:
+    ckpt_path: outputs/lam_v6_1_train/A_no_mask_20260514_190935/checkpoints/step_000899_finetune_ddp.pt
+    ckpt_format: finetune_ddp
+    base_ckpt: old_lam_400k
+    output_dim: 32
+    parent: old_lam_400k
+    status: lam_gate_passed
+    allowed_for_wm_control: true
+    train_data: cleandata_5dataset_8608clips_9p85h
+    notes: "v6.1-A simple no-mask (full-frame MSE + raw-z SigCLR + L_id + KL). Four-device DDP, B_real=54, 900 steps, checkpoint 899. IND validation: id_p50 0.031, rev_cos -0.129, PSNR 25.06 dB. AgiBot gate: id_ratio 0.071 and cam_shift3 1.83. Temporarily enabled for the corrected-loader diagnostic."
+
+  # -------- v6.1-B mask-lite, 900-step DDP4 finetune from old_lam_400k (2026-05-14) --------
+  lam_v6_1_B_step899:
+    ckpt_path: outputs/lam_v6_1_train/B_mask_lite_20260514_190935/checkpoints/step_000899_finetune_ddp.pt
+    ckpt_format: finetune_ddp
+    base_ckpt: old_lam_400k
+    output_dim: 32
+    parent: old_lam_400k
+    status: lam_gate_passed
+    allowed_for_wm_control: false
+    train_data: cleandata_5dataset_8608clips_9p85h
+    notes: "v6.1-B mask-lite (foreground reconstruction + background consistency + raw-z SigCLR + L_id + KL). Four-device DDP, B_real=54, 900 steps, checkpoint 899. Results are within noise of v6.1-A; v6.1-A is preferred because it does not require the mask pipeline."
+
+# Status enum (do not invent new values without updating the spec):
+#   baseline | lam_gate_failed | lam_gate_passed | qualified_for_wm_smoke
+#   wm_smoke_passed | wm_small_passed | promoted_best | retracted
+
+  # -------- V7 candidates (2026-05-15) --------
+  # V7 = V5.3 loss + V6.1 official crop/scale + cleandata 8.6k segments full-video coverage.
+  # See report/LAM_v7/REPORT.md for full design + trend.
+  # Trend pattern (per benchmark_v7_ckpt_trend.py): id_p50 best at step 100 across both A/B,
+  # then degrades during cosine λ_sig peak (step 200-700). step 100 best for AgiBot OOD eval.
+  v7_A_no_mask_step100:
+    ckpt_path: outputs/lam_v7_train/A_no_mask_20260515_102955/checkpoints/step_000100_finetune_ddp.pt
+    ckpt_format: finetune_ddp
+    base_ckpt: old_lam_400k
+    output_dim: 32
+    parent: old_lam_400k
+    status: lam_gate_partial   # id PASS (0.082<=0.12), rank FAIL (21.40<22.5)
+    allowed_for_wm_control: true
+    train_data: cleandata_5dataset_8608clips_77k_pair_no_mask
+    notes: V7-A best by AgiBot id_p50 (0.082, beats V5.3@1499 0.120, approaches lam_v1 0.076)
+
+  v7_A_no_mask_step999:
+    ckpt_path: outputs/lam_v7_train/A_no_mask_20260515_102955/checkpoints/step_000999_finetune_ddp.pt
+    ckpt_format: finetune_ddp
+    base_ckpt: old_lam_400k
+    output_dim: 32
+    parent: old_lam_400k
+    status: lam_gate_failed   # id 0.149, rank 20.11 — V7-A final ckpt
+    allowed_for_wm_control: false
+    train_data: cleandata_5dataset_8608clips_77k_pair_no_mask
+    notes: V7-A final ckpt; in-domain top1=0.670 but AgiBot id degraded vs step 100
+
+  v7_B_with_mask_step100:
+    ckpt_path: outputs/lam_v7_train/B_with_mask_20260515_102955/checkpoints/step_000100_finetune_ddp.pt
+    ckpt_format: finetune_ddp
+    base_ckpt: old_lam_400k
+    output_dim: 32
+    parent: old_lam_400k
+    status: lam_gate_partial   # id 0.087, rank 21.45
+    allowed_for_wm_control: true
+    train_data: cleandata_5dataset_8608clips_77k_pair_with_mask
+    notes: V7-B best by id (0.087); slightly worse id than V7-A step 100 but slightly better cam_shift
+
+  v7_B_with_mask_step999:
+    ckpt_path: outputs/lam_v7_train/B_with_mask_20260515_102955/checkpoints/step_000999_finetune_ddp.pt
+    ckpt_format: finetune_ddp
+    base_ckpt: old_lam_400k
+    output_dim: 32
+    parent: old_lam_400k
+    status: lam_gate_failed   # id 0.159, rank 20.17
+    allowed_for_wm_control: false
+    train_data: cleandata_5dataset_8608clips_77k_pair_with_mask
+    notes: V7-B final ckpt; in-domain top1=0.665, AgiBot id degraded
+
+  v7_B_with_mask_step300:
+    ckpt_path: outputs/lam_v7_train/B_with_mask_20260515_102955/checkpoints/step_000300_finetune_ddp.pt
+    ckpt_format: finetune_ddp
+    base_ckpt: old_lam_400k
+    output_dim: 32
+    parent: old_lam_400k
+    status: lam_gate_unknown
+    allowed_for_wm_control: true
+    train_data: cleandata_5dataset_8608clips_77k_pair_with_mask
+    notes: V7-B recon peak (PSNR_own 33.14 dB, gap 8.20)
+
+  # -------- v8-sync5h with-mask (cleandata_newmask train_5h, 2026-05-28) --------
+  lam_v8_sync5h_B_step1700:
+    ckpt_path: outputs/lam_v8_sync5h_train/B_with_mask_6gpu_LATEST/checkpoints/step_001700_finetune_ddp.pt
+    ckpt_format: finetune_ddp
+    base_ckpt: old_lam_400k
+    output_dim: 32
+    parent: old_lam_400k
+    status: lam_gate_unknown
+    allowed_for_wm_control: true
+    train_data: cleandata_newmask_train_5h_39825pair
+    notes: v8-sync5h-B uses the V7-B mask recipe with four-device DDP, B_real=54, and 2,000 steps. This is the margin-selected checkpoint; the launcher maintains the LATEST symlink.
+
+  # -------- Ablation Study LAM candidates (2026-05-21) --------
+  ablation_baseline_ego_mix_step999:
+    ckpt_path: outputs/ablation_study/lam_runs/L00_D0_ego5_mask_rerun1/checkpoints/step_000999.pt
+    ckpt_format: finetune_ddp
+    base_ckpt: old_lam_400k
+    output_dim: 32
+    parent: old_lam_400k
+    status: lam_gate_passed
+    allowed_for_wm_control: true
+    train_data: ablation_D0_ego_mix
+    notes: Ablation Study baseline LAM. D0 ego mix, mask FG/BG + SigLIP + identity + KL, 1000-step screen, step999 selected for WM.
+
+  ablation_add_bridge_step999:
+    ckpt_path: outputs/ablation_study/lam_runs/D01_ego5_bridge_mask_rerun1/checkpoints/step_000999.pt
+    ckpt_format: finetune_ddp
+    base_ckpt: old_lam_400k
+    output_dim: 32
+    parent: old_lam_400k
+    status: lam_gate_passed
+    allowed_for_wm_control: true
+    train_data: ablation_D1_ego_plus_bridge
+    notes: Ablation Study LAM with Bridge robot data added. First WM candidate from strict robot OOD gate.
+
+  ablation_add_bridge_agibot_step999:
+    ckpt_path: outputs/ablation_study/lam_runs/D02_ego5_bridge_agibot_mask/checkpoints/step_000999.pt
+    ckpt_format: finetune_ddp
+    base_ckpt: old_lam_400k
+    output_dim: 32
+    parent: old_lam_400k
+    status: lam_gate_passed
+    allowed_for_wm_control: true
+    train_data: ablation_D2_ego_plus_bridge_plus_agibot
+    notes: Ablation Study LAM with Bridge and AgiBot robot data added. Secondary WM candidate; action-hard gap improves slightly but scalar reconstruction does not clearly win.
+
+  ablation_no_background_loss_step999:
+    ckpt_path: outputs/ablation_study/lam_runs/L04_D0_no_bg/checkpoints/step_000999.pt
+    ckpt_format: finetune_ddp
+    base_ckpt: old_lam_400k
+    output_dim: 32
+    parent: old_lam_400k
+    status: lam_gate_passed
+    allowed_for_wm_control: true
+    train_data: ablation_D0_ego_mix_no_background_consistency
+    notes: Ablation Study loss diagnostic. Same D0 data and losses as baseline except background consistency removed; needs WM rollout to judge visual effect.
+
+  ablation_full_frame_no_mask_step999:
+    ckpt_path: outputs/ablation_study/lam_runs/L01_D0_full_recon/checkpoints/step_000999.pt
+    ckpt_format: finetune_ddp
+    base_ckpt: old_lam_400k
+    output_dim: 32
+    parent: old_lam_400k
+    status: lam_diagnostic_control
+    allowed_for_wm_control: true
+    train_data: ablation_D0_ego_mix_full_frame_reconstruction
+    notes: Ablation Study loss diagnostic. Same D0 data as baseline, but uses full-frame reconstruction instead of mask-focused reconstruction.
+
+  ablation_no_siglip_step999:
+    ckpt_path: outputs/ablation_study/lam_runs/L02_D0_no_siglip/checkpoints/step_000999.pt
+    ckpt_format: finetune_ddp
+    base_ckpt: old_lam_400k
+    output_dim: 32
+    parent: old_lam_400k
+    status: lam_diagnostic_control
+    allowed_for_wm_control: true
+    train_data: ablation_D0_ego_mix_no_siglip
+    notes: Ablation Study loss diagnostic. Same D0 data and main losses as baseline, with SigLIP alignment removed.
+
+  ablation_no_identity_step999:
+    ckpt_path: outputs/ablation_study/lam_runs/L03_D0_no_identity/checkpoints/step_000999.pt
+    ckpt_format: finetune_ddp
+    base_ckpt: old_lam_400k
+    output_dim: 32
+    parent: old_lam_400k
+    status: lam_bad_control
+    allowed_for_wm_control: true
+    train_data: ablation_D0_ego_mix_no_identity
+    notes: Ablation Study bad control. Same D0 data as baseline, with identity loss removed; included to measure how identity/no-op collapse propagates to WM.
+
+  ablation_egodex_only_step999:
+    ckpt_path: outputs/ablation_study/lam_runs/S01_egodex_mask/checkpoints/step_000999.pt
+    ckpt_format: finetune_ddp
+    base_ckpt: old_lam_400k
+    output_dim: 32
+    parent: old_lam_400k
+    status: lam_dataset_diagnostic
+    allowed_for_wm_control: true
+    train_data: ablation_single_dataset_egodex
+    notes: Ablation Study single-dataset diagnostic. EgoDex-only LAM, mask recipe, included to test whether clean single-source ego data transfers through WM.
+
+  ablation_epic_kitchens_only_step999:
+    ckpt_path: outputs/ablation_study/lam_runs/S02_epic_kitchens_mask/checkpoints/step_000999.pt
+    ckpt_format: finetune_ddp
+    base_ckpt: old_lam_400k
+    output_dim: 32
+    parent: old_lam_400k
+    status: lam_dataset_diagnostic
+    allowed_for_wm_control: true
+    train_data: ablation_single_dataset_epic_kitchens
+    notes: Ablation Study single-dataset diagnostic. EPIC-Kitchens-only LAM, mask recipe, included to test daily/kitchen ego action transfer through WM.
+
+  ablation_h2o_only_step999:
+    ckpt_path: outputs/ablation_study/lam_runs/S03_h2o_mask/checkpoints/step_000999.pt
+    ckpt_format: finetune_ddp
+    base_ckpt: old_lam_400k
+    output_dim: 32
+    parent: old_lam_400k
+    status: lam_dataset_diagnostic
+    allowed_for_wm_control: true
+    train_data: ablation_single_dataset_h2o
+    notes: Ablation Study single-dataset diagnostic. H2O-only LAM, mask recipe, included to test whether small but hand-object-focused data transfers through WM.
+
+  ablation_bridge_only_step999:
+    ckpt_path: outputs/ablation_study/lam_runs/S04_bridge_mask/checkpoints/step_000999.pt
+    ckpt_format: finetune_ddp
+    base_ckpt: old_lam_400k
+    output_dim: 32
+    parent: old_lam_400k
+    status: lam_dataset_diagnostic
+    allowed_for_wm_control: true
+    train_data: ablation_single_dataset_bridge
+    notes: Ablation Study single-dataset diagnostic. Bridge-only LAM, mask recipe, included as a robot-source transfer/control WM candidate.
+
+  ablation_agibot_only_step999:
+    ckpt_path: outputs/ablation_study/lam_runs/S05_agibot_mask/checkpoints/step_000999.pt
+    ckpt_format: finetune_ddp
+    base_ckpt: old_lam_400k
+    output_dim: 32
+    parent: old_lam_400k
+    status: lam_dataset_diagnostic
+    allowed_for_wm_control: true
+    train_data: ablation_single_dataset_agibot
+    notes: Ablation Study single-dataset diagnostic. AgiBot-only LAM, mask recipe, included as a target-robot-source transfer/control WM candidate.
+
+  # -------- Ablation Study LAM candidates, user-selected step300 main WM table (2026-05-21) --------
+  ablation_baseline_ego_mix_step300:
+    ckpt_path: outputs/ablation_study/lam_runs/L00_D0_ego5_mask_rerun1/checkpoints/step_000300.pt
+    ckpt_format: finetune_ddp
+    base_ckpt: old_lam_400k
+    output_dim: 32
+    parent: old_lam_400k
+    status: lam_step300_screening
+    allowed_for_wm_control: true
+    train_data: ablation_D0_ego_mix
+    notes: Ablation Study loss-family full-loss control at step300 on D0 ego-mix. Not V7/final baseline; used only as the paired control for remove-one-loss ablations.
+
+  ablation_add_bridge_step300:
+    ckpt_path: outputs/ablation_study/lam_runs/D01_ego5_bridge_mask_rerun1/checkpoints/step_000300.pt
+    ckpt_format: finetune_ddp
+    base_ckpt: old_lam_400k
+    output_dim: 32
+    parent: old_lam_400k
+    status: lam_step300_screening
+    allowed_for_wm_control: true
+    train_data: ablation_D1_ego_plus_bridge
+    notes: Ablation Study Bridge-added LAM at step300. Same recipe as baseline except added Bridge data.
+
+  ablation_add_bridge_agibot_step300:
+    ckpt_path: outputs/ablation_study/lam_runs/D02_ego5_bridge_agibot_mask/checkpoints/step_000300.pt
+    ckpt_format: finetune_ddp
+    base_ckpt: old_lam_400k
+    output_dim: 32
+    parent: old_lam_400k
+    status: lam_step300_screening
+    allowed_for_wm_control: true
+    train_data: ablation_D2_ego_plus_bridge_plus_agibot
+    notes: Ablation Study Bridge+AgiBot LAM at step300. Same recipe as baseline except added Bridge and AgiBot data.
+
+  ablation_no_background_loss_step300:
+    ckpt_path: outputs/ablation_study/lam_runs/L04_D0_no_bg/checkpoints/step_000300.pt
+    ckpt_format: finetune_ddp
+    base_ckpt: old_lam_400k
+    output_dim: 32
+    parent: old_lam_400k
+    status: lam_step300_screening
+    allowed_for_wm_control: true
+    train_data: ablation_D0_ego_mix_no_background_consistency
+    notes: Ablation Study no-background diagnostic LAM at step300. Same data as baseline, background consistency loss removed.
+
+  ablation_full_frame_no_mask_step300:
+    ckpt_path: outputs/ablation_study/lam_runs/L01_D0_full_recon/checkpoints/step_000300.pt
+    ckpt_format: finetune_ddp
+    base_ckpt: old_lam_400k
+    output_dim: 32
+    parent: old_lam_400k
+    status: lam_step300_screening
+    allowed_for_wm_control: true
+    train_data: ablation_D0_ego_mix_full_frame_reconstruction
+    notes: Ablation Study full-frame/no-mask diagnostic LAM at step300. Same D0 data as baseline, full-frame reconstruction objective.
+
+  ablation_no_siglip_step300:
+    ckpt_path: outputs/ablation_study/lam_runs/L02_D0_no_siglip/checkpoints/step_000300.pt
+    ckpt_format: finetune_ddp
+    base_ckpt: old_lam_400k
+    output_dim: 32
+    parent: old_lam_400k
+    status: lam_step300_screening
+    allowed_for_wm_control: true
+    train_data: ablation_D0_ego_mix_no_siglip
+    notes: Ablation Study no-SigLIP diagnostic LAM at step300. Same D0 data as baseline, SigLIP alignment removed.
+
+  ablation_no_identity_step300:
+    ckpt_path: outputs/ablation_study/lam_runs/L03_D0_no_identity/checkpoints/step_000300.pt
+    ckpt_format: finetune_ddp
+    base_ckpt: old_lam_400k
+    output_dim: 32
+    parent: old_lam_400k
+    status: lam_step300_bad_control
+    allowed_for_wm_control: true
+    train_data: ablation_D0_ego_mix_no_identity
+    notes: Ablation Study no-identity bad-control LAM at step300. Same D0 data as baseline, identity loss removed.
+
+  ablation_egodex_only_step300:
+    ckpt_path: outputs/ablation_study/lam_runs/S01_egodex_mask/checkpoints/step_000300.pt
+    ckpt_format: finetune_ddp
+    base_ckpt: old_lam_400k
+    output_dim: 32
+    parent: old_lam_400k
+    status: lam_step300_screening
+    allowed_for_wm_control: true
+    train_data: ablation_single_dataset_egodex
+    notes: Ablation Study EgoDex-only LAM at step300. Single-dataset source diagnostic with mask recipe.
+
+  ablation_epic_kitchens_only_step300:
+    ckpt_path: outputs/ablation_study/lam_runs/S02_epic_kitchens_mask/checkpoints/step_000300.pt
+    ckpt_format: finetune_ddp
+    base_ckpt: old_lam_400k
+    output_dim: 32
+    parent: old_lam_400k
+    status: lam_step300_screening
+    allowed_for_wm_control: true
+    train_data: ablation_single_dataset_epic_kitchens
+    notes: Ablation Study EPIC-Kitchens-only LAM at step300. Single-dataset source diagnostic with mask recipe.
+
+  ablation_h2o_only_step300:
+    ckpt_path: outputs/ablation_study/lam_runs/S03_h2o_mask/checkpoints/step_000300.pt
+    ckpt_format: finetune_ddp
+    base_ckpt: old_lam_400k
+    output_dim: 32
+    parent: old_lam_400k
+    status: lam_step300_screening
+    allowed_for_wm_control: true
+    train_data: ablation_single_dataset_h2o
+    notes: Ablation Study H2O-only LAM at step300. Single-dataset source diagnostic with mask recipe.
+
+  ablation_bridge_only_step300:
+    ckpt_path: outputs/ablation_study/lam_runs/S04_bridge_mask/checkpoints/step_000300.pt
+    ckpt_format: finetune_ddp
+    base_ckpt: old_lam_400k
+    output_dim: 32
+    parent: old_lam_400k
+    status: lam_step300_screening
+    allowed_for_wm_control: true
+    train_data: ablation_single_dataset_bridge
+    notes: Ablation Study Bridge-only LAM at step300. Single-dataset robot-source diagnostic with mask recipe.
+
+  ablation_agibot_only_step300:
+    ckpt_path: outputs/ablation_study/lam_runs/S05_agibot_mask/checkpoints/step_000300.pt
+    ckpt_format: finetune_ddp
+    base_ckpt: old_lam_400k
+    output_dim: 32
+    parent: old_lam_400k
+    status: lam_step300_screening
+    allowed_for_wm_control: true
+    train_data: ablation_single_dataset_agibot
+    notes: Ablation Study AgiBot-only LAM at step300. Single-dataset robot-source diagnostic with mask recipe.
+
+  scale_10h_masked_step140:
+    ckpt_path: artifacts/scale_ckpt/10h_masked_train/step_000140.pt
+    ckpt_format: finetune_ddp
+    base_ckpt: old_lam_400k
+    output_dim: 32
+    parent: old_lam_400k
+    status: qualified_for_wm
+    allowed_for_wm_control: true
+    train_data: scale_10h_masked
+    notes: Scale 10h masked LAM step140 sweet-spot (3-line contract 10h->s140; MUST match 10h bridge LAM for z-space consistency in posttrain). finetune_ddp, same fmt/size as 100h/1000h scale LAMs.
+
+  scale_100h_masked_step149:
+    ckpt_path: artifacts/scale_ckpt/100h_masked/step_000149.pt
+    ckpt_format: finetune_ddp
+    base_ckpt: old_lam_400k
+    output_dim: 32
+    parent: old_lam_400k
+    status: qualified_for_wm
+    allowed_for_wm_control: true
+    train_data: scale_100h_masked
+    notes: Scale 100h masked LAM step149 final (id_ratio 0.0465 / usage_gap 7.04, >=V7-B)
+
+  scale_1000h_masked_step180:
+    ckpt_path: artifacts/scale_ckpt/1000h_masked/step_000180.pt
+    ckpt_format: finetune_ddp
+    base_ckpt: old_lam_400k
+    output_dim: 32
+    parent: old_lam_400k
+    status: qualified_for_wm
+    allowed_for_wm_control: true
+    train_data: scale_1000h_masked
+    notes: 1000h masked LAM step180 (user-specified, NOT final step1499)
