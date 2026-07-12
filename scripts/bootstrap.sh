@@ -6,15 +6,25 @@ PYTHON="${PYTHON:-python3}"
 VENV="${CDLAM_VENV:-$ROOT/.venv}"
 WITH_METRICS=0
 WITH_MODELS=0
+OFFLINE_CACHE=""
+REUSE_SYSTEM_RUNTIME=0
 
 usage() {
   cat <<'EOF'
-Usage: bash scripts/bootstrap.sh [--with-metrics] [--with-models]
+Usage: bash scripts/bootstrap.sh [OPTIONS]
 
 Creates a local environment, installs CD-LAM, and runs the deterministic
 smoke suite. Optional metric backends have separate licenses and are fetched
-only when --with-metrics is requested. --with-models downloads the complete
-public model snapshot (about 23 GB) after the source gates pass.
+only when --with-metrics is requested. --with-models downloads the pinned
+compact model snapshot after the source gates pass.
+
+Options:
+  --offline-cache PATH    Install without network access from a cache created
+                          by scripts/offline_cache.py on a compatible machine.
+  --reuse-system-runtime  Explicitly expose the parent interpreter's packages
+                          inside the venv. This is not a clean-room install.
+  --with-metrics          Fetch optional metric source after core validation.
+  --with-models           Download and verify the public model snapshot.
 EOF
 }
 
@@ -22,6 +32,12 @@ while [[ $# -gt 0 ]]; do
   case "$1" in
     --with-metrics) WITH_METRICS=1 ;;
     --with-models) WITH_MODELS=1 ;;
+    --offline-cache)
+      [[ $# -ge 2 ]] || { echo "--offline-cache requires a path" >&2; exit 2; }
+      OFFLINE_CACHE="$2"
+      shift
+      ;;
+    --reuse-system-runtime) REUSE_SYSTEM_RUNTIME=1 ;;
     -h|--help) usage; exit 0 ;;
     *) echo "Unknown option: $1" >&2; usage >&2; exit 2 ;;
   esac
@@ -33,22 +49,48 @@ command -v "$PYTHON" >/dev/null 2>&1 || {
   exit 2
 }
 
+if [[ "$WITH_MODELS" == 1 ]]; then
+  "$PYTHON" "$ROOT/scripts/download_models.py" --dry-run >/dev/null
+fi
+
+if [[ -n "$OFFLINE_CACHE" && ( "$WITH_METRICS" == 1 || "$WITH_MODELS" == 1 ) ]]; then
+  echo "--offline-cache cannot fetch metrics or models; stage those licensed assets separately." >&2
+  exit 2
+fi
+if [[ -n "$OFFLINE_CACHE" && "$REUSE_SYSTEM_RUNTIME" == 1 ]]; then
+  echo "--offline-cache and --reuse-system-runtime are mutually exclusive." >&2
+  exit 2
+fi
+
 if [[ ! -x "$VENV/bin/python" ]]; then
-  "$PYTHON" -m venv --system-site-packages "$VENV"
+  if [[ "$REUSE_SYSTEM_RUNTIME" == 1 ]]; then
+    "$PYTHON" -m venv --system-site-packages "$VENV"
+  else
+    "$PYTHON" -m venv "$VENV"
+  fi
 fi
 
 if [[ "${CDLAM_UPGRADE_PIP:-no}" == yes ]]; then
   "$VENV/bin/python" -m pip install --upgrade pip
 fi
-install_target="$ROOT[test]"
-if [[ "$WITH_MODELS" == 1 ]]; then
-  install_target="$ROOT[test,download]"
-fi
-required_modules=(numpy torch yaml pytest ruff build)
-if [[ "$WITH_MODELS" == 1 ]]; then
-  required_modules+=(huggingface_hub)
-fi
-if "$VENV/bin/python" - "${required_modules[@]}" <<'PY'
+if [[ -n "$OFFLINE_CACHE" ]]; then
+  include_system="$(sed -n 's/^include-system-site-packages = //p' "$VENV/pyvenv.cfg")"
+  if [[ "$include_system" != false ]]; then
+    echo "offline bootstrap requires an isolated venv; remove $VENV and retry." >&2
+    exit 2
+  fi
+  "$PYTHON" "$ROOT/scripts/offline_cache.py" install \
+    --cache "$OFFLINE_CACHE" --target-python "$VENV/bin/python"
+else
+  install_target="$ROOT[test]"
+  if [[ "$WITH_MODELS" == 1 ]]; then
+    install_target="$ROOT[test,download]"
+  fi
+  required_modules=(numpy torch yaml pytest ruff build setuptools wheel)
+  if [[ "$WITH_MODELS" == 1 ]]; then
+    required_modules+=(huggingface_hub)
+  fi
+  if [[ "$REUSE_SYSTEM_RUNTIME" == 1 ]] && "$VENV/bin/python" - "${required_modules[@]}" <<'PY'
 import importlib.util
 import sys
 
@@ -57,15 +99,15 @@ if missing:
     print("missing Python modules: " + ", ".join(missing))
     raise SystemExit(1)
 PY
-then
-  # Existing research runtimes often have a working CUDA torch build whose
-  # wheel metadata would make pip resolve another multi-GB CUDA stack. Keep
-  # that tested runtime intact and install only CD-LAM itself. Build isolation
-  # still installs the small backend declared in pyproject.toml, so a newly
-  # created venv is not coupled to its bundled setuptools version.
-  "$VENV/bin/python" -m pip install --no-deps -e "$install_target"
-else
-  "$VENV/bin/python" -m pip install -e "$install_target"
+  then
+    # Reuse is explicit because resolving against an existing CUDA runtime is
+    # useful for researchers but is not evidence of a clean installation.
+    "$VENV/bin/python" -m pip install --no-build-isolation --no-deps -e "$install_target"
+  else
+    "$VENV/bin/python" -m pip install -r "$ROOT/requirements.lock"
+    "$VENV/bin/python" -m pip install \
+      --no-build-isolation --no-deps -e "$install_target"
+  fi
 fi
 
 if [[ "$WITH_METRICS" == 1 ]]; then
@@ -91,5 +133,6 @@ cat <<EOF
 
 CD-LAM is ready.
   environment: $VENV
+  install:     $([[ -n "$OFFLINE_CACHE" ]] && echo offline-cache || ([[ "$REUSE_SYSTEM_RUNTIME" == 1 ]] && echo reused-runtime || echo isolated-online))
   next:        bash scripts/run.sh doctor --strict
 EOF

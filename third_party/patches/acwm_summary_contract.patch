@@ -1,0 +1,12 @@
+diff --git a/lamwm_pipline/tools/train_wm_compat_real.py b/lamwm_pipline/tools/train_wm_compat_real.py
+--- a/lamwm_pipline/tools/train_wm_compat_real.py
++++ b/lamwm_pipline/tools/train_wm_compat_real.py
+@@ -1542,6 +1542,8 @@
+         "experiment": args.experiment,
+         "ckpt": args.ckpt,
+         "input_video": args.input_video,
++        "scope": args.scope,
++        "fps_source": "manifest" if manifest_mode else "fixed_8",
+         "train_manifest": args.train_manifest,
+         "manifest_split": args.manifest_split,
+         "manifest_audit_all_ranks": bool(args.manifest_audit_all_ranks),

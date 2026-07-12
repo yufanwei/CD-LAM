@@ -9,12 +9,14 @@ The source repository is licensed under Apache License 2.0. The license does
 not grant rights to separately obtained datasets, base models, checkpoints, or
 third-party dependencies.
 
-In particular, the ACWM base implementation, SAM3, CoWTracker, their model
-weights, and their transitive dependencies are not vendored. They retain their
-respective copyright notices, licenses, acceptable-use terms, and access
-requirements. CoWTracker is identified upstream as noncommercial research
-software. Review third_party/dependencies.lock.json and each upstream license
-before fetching or using an optional dependency.
+The complete ACWM base implementation, SAM3, CoWTracker, their model weights,
+and their transitive dependencies are not vendored. A source-only CD-LAM ACWM
+integration overlay is included under `third_party/acwm_overlay` and is applied
+only to the pinned Apache-2.0 upstream revision. Upstream copyright and license
+notices remain applicable. External repositories and weights retain their own
+licenses, acceptable-use terms, and access requirements. CoWTracker is
+identified upstream as noncommercial research software. Review
+`third_party/dependencies.lock.json` and each upstream license before use.
 
 DreamDojo appears in result fixtures as the scientifically attributed baseline
 and in the external dependency lock as an upstream ACWM implementation. It is

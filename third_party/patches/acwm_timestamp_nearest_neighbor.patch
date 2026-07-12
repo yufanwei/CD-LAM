@@ -1,0 +1,23 @@
+diff --git a/groot_dreams/utils/video.py b/groot_dreams/utils/video.py
+index 50c3277..e363d86 100644
+--- a/groot_dreams/utils/video.py
++++ b/groot_dreams/utils/video.py
+@@ -101,11 +101,15 @@ def get_frames_by_timestamps(
+             loaded_ts.append(current_ts)
+             if current_ts >= last_ts:
+                 break
+-            if len(loaded_frames) >= len(timestamps):
+-                break
+         reader.container.close()
+         reader = None
+-        frames = np.array(loaded_frames)
++        if not loaded_frames:
++            raise ValueError(f"Unable to read frames from video file: {video_path}")
++
++        loaded_ts = np.asarray(loaded_ts, dtype=np.float64)
++        requested_ts = np.asarray(timestamps, dtype=np.float64)
++        indices = np.abs(loaded_ts[:, np.newaxis] - requested_ts[np.newaxis, :]).argmin(axis=0)
++        frames = np.array([loaded_frames[int(i)] for i in indices])
+         return frames.transpose(0, 2, 3, 1)
+     else:
+         raise NotImplementedError

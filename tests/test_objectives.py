@@ -79,7 +79,9 @@ def test_objectives_smoke_and_backprop() -> None:
 def test_free_bits_and_relative_zero_calibration_analytical_cases() -> None:
     mean = torch.zeros(3, 2)
     log_variance = torch.zeros_like(mean)
-    assert free_bits_kl_loss(mean, log_variance, free_bits=0.5).item() == pytest.approx(1.0)
+    assert free_bits_kl_loss(mean, log_variance, free_bits=0.5).item() == pytest.approx(
+        1.0
+    )
 
     zero = torch.tensor([[3.0, 4.0]])
     relative = relative_zero_transition_loss(
@@ -99,8 +101,6 @@ def test_objective_shape_checks_are_explicit() -> None:
             torch.zeros(1, 4, 4),
         )
     with pytest.raises(ValueError, match=r"shape \(3,\)"):
-        siglip_action_contrastive_loss(
-            torch.randn(3, 4), torch.tensor([0, 1])
-        )
+        siglip_action_contrastive_loss(torch.randn(3, 4), torch.tensor([0, 1]))
     with pytest.raises(ValueError, match="exactly one"):
         relative_zero_transition_loss(torch.randn(2, 4))

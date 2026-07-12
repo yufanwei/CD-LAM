@@ -47,7 +47,9 @@ class _TinyLAM(nn.Module):
         )
 
     def encode(self, current: Tensor, future: Tensor) -> tuple[Tensor, Tensor]:
-        hidden = self.encoder(torch.cat([current.flatten(1), future.flatten(1)], dim=-1))
+        hidden = self.encoder(
+            torch.cat([current.flatten(1), future.flatten(1)], dim=-1)
+        )
         return self.mean(hidden), self.log_variance(hidden).clamp(-4.0, 4.0)
 
     def reconstruct(self, current: Tensor, latent: Tensor) -> Tensor:
@@ -259,10 +261,10 @@ def run_stage2(context: StageContext) -> StageResult:
     )
 
 
-def _bridge_batch(context: StageContext) -> tuple[Tensor, Tensor, Tensor, Tensor, Tensor, Tensor]:
-    dependency_seed = _upstream_seed(
-        context, "stage1_lam", context.plan.seed + 211
-    )
+def _bridge_batch(
+    context: StageContext,
+) -> tuple[Tensor, Tensor, Tensor, Tensor, Tensor, Tensor]:
+    dependency_seed = _upstream_seed(context, "stage1_lam", context.plan.seed + 211)
     generator = torch.Generator(device="cpu")
     generator.manual_seed(dependency_seed)
     batch = max(8, min(context.plan.batch_size, 32))
@@ -299,9 +301,7 @@ def run_bridge_training(context: StageContext) -> StageResult:
         latent_std,
     ) = _bridge_batch(context)
     bridge_mlp = build_bridge_mlp()
-    optimizer = torch.optim.Adam(
-        bridge_mlp.parameters(), lr=context.plan.learning_rate
-    )
+    optimizer = torch.optim.Adam(bridge_mlp.parameters(), lr=context.plan.learning_rate)
     resume, start_step = load_resume_checkpoint(context)
     if resume is not None:
         bridge_mlp.load_state_dict(resume["g_state"], strict=True)

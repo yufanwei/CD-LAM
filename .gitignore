@@ -18,6 +18,7 @@ htmlcov/
 # User configuration
 configs/runtime.env
 configs/runtime.local.*
+configs/runtime.json
 
 # Model, data, and generated artifacts
 artifacts/

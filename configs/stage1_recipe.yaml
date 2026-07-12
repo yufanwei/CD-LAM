@@ -1,0 +1,118 @@
+# CD-LAM Stage-1 masked training recipe.
+# Recipe: official crop/scale and mask-supervised latent-action LAM fine-tuning.
+# Loss: foreground/background reconstruction, SigLIP action geometry, identity, and KL.
+# Data: lam_pair_index.parquet materialized from the Scale recipe.
+
+trainer:
+  pair_index_train: data/prepared/stage1/train.parquet
+  base_lam: LAM                  # The launcher binds the local base checkpoint.
+  init_ckpt: ""                  # No additional overlay on the base checkpoint.
+  device: "cuda:0"
+  amp_dtype: bfloat16
+  target_h: 240
+  target_w: 320
+
+  sampler:
+    canonical_primitives: [pick_place, insert_remove, stack_unstack, scoop_dump,
+                            open, close, turn_on, turn_off,
+                            wash_rinse, cut, stir, pour]
+    p_negative_same_episode: 0.5
+    mask_cache_size: 256
+
+  batch:
+    B_real: 54
+    B_id: 6
+    B_mask: 0
+    decode_workers: 6
+    use_grad_ckpt: true
+
+  loss:
+    beta_kl_init: 0.0001
+    beta_kl_target: 0.001
+    beta_kl_ramp_end_step: 500
+    beta_kl: 0.001
+    kl_free_bit: 0.5
+
+    masked_reconstruction:
+      enabled: true
+      partial_full_mix: true
+      foreground_weight: 1.0
+      background_weight: 0.02
+      full_frame_weight: 1.0
+      min_foreground_pixels: 64
+      min_background_pixels: 64
+
+    w_id: 1.0
+    w_id_margin: 0.05
+
+    action_loss_kind: siglip
+    siglip_proj_dim: 32
+    siglip_hidden_dim: 128
+    siglip_head_lr: 1.0e-4
+    siglip_init_log_scale: 2.302585
+    siglip_init_bias: -3.0
+    siglip_w_opposite: 2.0
+    siglip_w_hard_neg: 1.5
+    siglip_min_label_confidence: 0.3
+
+    lambda_sig_target: 0.020
+    lambda_sig_target_final: 0.005
+    lambda_sig_decay_end_step: 1000
+
+    contrastive_extensions:
+      structured_graph: false
+      split_loss: false
+      grouped_action_loss: false
+      cross_dataset_centroid: false
+      cross_dataset_rank: false
+      prototype_separation: false
+      hard_positive_mining: false
+
+    lambda_use: 0.0
+    eta_inter: 0.0
+    margin_use_full: 0.005
+    margin_use_inter: 0.010
+    l_use_every: 999
+    alpha_inter: 0.0
+    mask_min_pixels: 64
+
+    lambda_rel_target: 0.005
+    supcon_temperature: 0.07
+    min_label_confidence: 0.3
+    center_ema_alpha: 0.95
+    hard_neg_weight: 1.0
+
+  schedule:
+    warmup_steps: 150
+    ramp_end_step: 400
+    total_steps: 2000
+
+  lr:
+    G_head:    8.0e-6
+    G_late:    7.0e-7
+    G_mid:     2.0e-7
+    G_early:   1.0e-7
+    G_decoder: 1.0e-7
+    weight_decay: 1.0e-4
+    eps: 1.0e-8
+    grad_clip_max_norm: 1.0
+
+  cadence:
+    log_every: 25
+    ckpt_every: 100
+    eval_every: 100
+    eval_n_pairs_real: 200
+    eval_n_pairs_id: 80
+    eval_n_per_primitive: 40
+    eval_n_recon_tile: 4
+    eval_split_parquet: ""
+    baseline_checkpoint: ""
+
+  stop:
+    identity_ratio_max: 0.20
+    eff_rank_drop_frac_max: 0.20
+    usage_gap_zero_min: 0.0
+    usage_gap_shuffle_min: 0.0
+    kl_per_dim_mean_min: 0.05
+    top1_min: 0.30
+    pairwise_cos_raw_max: 0.65

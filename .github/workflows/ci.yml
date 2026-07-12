@@ -43,7 +43,7 @@ jobs:
           python -m pip install torch==2.7.0 \
             --index-url https://download.pytorch.org/whl/cpu
           python -m pip install -r requirements.lock
-          python -m pip install --no-deps -e ".[test]"
+          python -m pip install --no-build-isolation --no-deps -e ".[test]"
 
       - name: Release hygiene and English-only scan
         run: python scripts/release_check.py --strict
@@ -115,6 +115,9 @@ jobs:
         run: |
           "$RUNNER_TEMP/wheel-venv/bin/python" -c \
             "import cd_lam; print(cd_lam.__version__)"
+          "$RUNNER_TEMP/wheel-venv/bin/python" -c \
+            "import cdlam_runtime; print(cdlam_runtime.__version__)"
+          "$RUNNER_TEMP/wheel-venv/bin/cdlam-runtime" --help
           "$RUNNER_TEMP/wheel-venv/bin/python" -m cd_lam smoke
           "$RUNNER_TEMP/wheel-venv/bin/python" -m cd_lam train-smoke \
             --output-root "$RUNNER_TEMP/wheel-train-smoke" \

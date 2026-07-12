@@ -18,12 +18,17 @@ latent action condition used by embodied action conditioned world models. It
 adds three LAM fine-tuning objectives, adapts the ACWM to the repaired latent
 space, and then learns a 22D-robot-action-to-32D-latent bridge.
 
-This card describes the method and release family. Tensor-exact 2B research
-checkpoints for the 100h and 1000h lineages are published at
-<https://huggingface.co/yufanwei/CD-LAM>. They include Stage-1 LAM, Stage-2 and
-Stage-3 ACWM overlays, and matching 22D-to-32D bridges. The source checkout
-provides typed plans and method primitives; applying an overlay still requires
-the compatible external base model and production adapter.
+This card describes the method and release family. A compact snapshot with
+exactly three main tensor-exact 2B research entries is prepared for
+<https://huggingface.co/yufanwei/CD-LAM>: a selected masked LAM, its compatible
+pretrained ACWM overlay, and a separate 100h robot-action posttrained overlay.
+It has passed local release validation but has not yet replaced the legacy
+layout on Hugging Face `main`.
+The posttrained directory includes its 22D-to-32D bridge and action contract as
+auxiliary files. The source checkout provides typed planners, method
+primitives, concrete 2B launch wrappers, and a manifest-checked source overlay.
+Real execution still requires the separately licensed compatible base model,
+user-obtained data, and a CUDA model environment.
 
 ## Architecture and training stages
 
@@ -43,7 +48,8 @@ for 2B and 6,000 for 14B.
   12-way caption-derived verb categories, not executable robot actions.
 - Stage 3 uses paired AgiBot video and stride-4 action transitions. The paper
   bridge input is `absolute_action[t + 4] - absolute_action[t]` in the fixed
-  arm-14, grippers-2, head-2, waist-2, base-2 order.
+  arm-14, grippers-2, head-2, waist-2, robot-velocity-2 order. Absolute actions
+  come from the publisher's command arrays, not robot state.
 - Stage-2 evaluation uses 300 held-out EgoDex clips.
 - Stage-3 evaluation uses 300 AgiBot clips from distinct episodes.
 
@@ -84,9 +90,12 @@ high-stakes decisions.
 
 ## Limitations
 
-- The released files cover two 2B research lineages, not a verified 14B or
-  complete headline-table reproduction; the compatible base model, original
-  data, and evaluation assets remain separate requirements.
+- The prepared compact files expose three main 2B research entries, not a
+  verified 14B release or complete headline-table reproduction; the compatible
+  base model, original data, and evaluation assets remain separate requirements.
+- The compact LAM and pretrain entries form one compatible pair. The 100h
+  posttrained entry belongs to a different latent-space lineage and must use
+  its colocated bridge/action contract; the three entries are not one chain.
 - Results cover the datasets, backbones, action conventions, and scales in the
   manuscript; generalization beyond them is not established.
 - FDCE depends on segmentation and tracking. Occlusion, motion blur,
@@ -97,8 +106,9 @@ high-stakes decisions.
   require this semantic metadata to be supplied separately.
 - The reference loader's normalized block-anchor deltas must be converted to
   raw adjacent deltas before the paper bridge. The public action utility tests
-  this conversion; external adapters remain responsible for wiring it before
-  reduced-precision casting.
+  this conversion, and the bundled Stage-3 wrapper applies it before
+  reduced-precision casting. A custom backbone integration must preserve the
+  same ordering.
 - The “more than 12x” result compares aligned optimizer updates needed to reach
   a baseline metric reference. It is not a wall-clock or final-checkpoint
   speedup claim.

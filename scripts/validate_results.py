@@ -11,7 +11,9 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_RESULTS = ROOT / "docs" / "results" / "paper_results.json"
-TITLE = "Causally Debiased Latent Action Model for Embodied Action Conditioned World Models"
+TITLE = (
+    "Causally Debiased Latent Action Model for Embodied Action Conditioned World Models"
+)
 
 
 def _rows_by_model(table: dict[str, Any]) -> dict[tuple[str, str], dict[str, Any]]:
@@ -39,7 +41,9 @@ def validate(payload: dict[str, Any]) -> dict[str, int]:
     if payload.get("paper", {}).get("title") != TITLE:
         raise ValueError("paper title does not match the canonical manuscript title")
     if payload.get("status", {}).get("recomputed_by_this_release") is not False:
-        raise ValueError("fixture must not claim that source-only validation recomputed metrics")
+        raise ValueError(
+            "fixture must not claim that source-only validation recomputed metrics"
+        )
 
     tables = payload.get("tables")
     if not isinstance(tables, dict):
@@ -73,7 +77,9 @@ def validate(payload: dict[str, Any]) -> dict[str, int]:
         raise ValueError("Table II backbone/model rows changed")
     for key, (own_fdce, transfer_fdce) in stage2_fdce.items():
         _assert_close(
-            stage2[key]["own_latent_rollout"]["fdce"], own_fdce, f"Table II {key} own FDCE"
+            stage2[key]["own_latent_rollout"]["fdce"],
+            own_fdce,
+            f"Table II {key} own FDCE",
         )
         _assert_close(
             stage2[key]["target_latent_transfer"]["fdce"],
@@ -103,9 +109,10 @@ def validate(payload: dict[str, Any]) -> dict[str, int]:
         for index, (value, target) in enumerate(zip(actual, expected)):
             _assert_close(value, target, f"Table III {key} field {index}")
 
-    if "not comparable" not in tables["table_iii"]["protocol"][
-        "zero_action_comparability"
-    ]:
+    if (
+        "not comparable"
+        not in tables["table_iii"]["protocol"]["zero_action_comparability"]
+    ):
         raise ValueError("Table III must retain the zero-action comparability warning")
     if "not comparable" not in tables["table_v"]["protocol"]["fdce"]:
         raise ValueError("Table V must remain explicitly separate from Table III")

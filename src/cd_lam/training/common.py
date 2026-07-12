@@ -66,7 +66,9 @@ class StageResult:
         return json.dumps(self.to_dict(), indent=2, sort_keys=True)
 
 
-def checkpoint_metadata(context: StageContext, *, completed_steps: int) -> dict[str, Any]:
+def checkpoint_metadata(
+    context: StageContext, *, completed_steps: int
+) -> dict[str, Any]:
     """Return metadata required in every checkpoint produced by public runners."""
 
     return {
@@ -99,7 +101,9 @@ def file_sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
-def load_resume_checkpoint(context: StageContext) -> tuple[Optional[dict[str, Any]], int]:
+def load_resume_checkpoint(
+    context: StageContext,
+) -> tuple[Optional[dict[str, Any]], int]:
     """Load and validate a synthetic checkpoint selected by a stage plan."""
 
     path = context.plan.resume_from
@@ -108,7 +112,9 @@ def load_resume_checkpoint(context: StageContext) -> tuple[Optional[dict[str, An
     try:
         blob = torch.load(path, map_location="cpu", weights_only=False)
     except Exception as exc:
-        raise StageExecutionError(f"failed to load resume checkpoint {path}: {exc}") from exc
+        raise StageExecutionError(
+            f"failed to load resume checkpoint {path}: {exc}"
+        ) from exc
     if not isinstance(blob, dict) or not isinstance(blob.get("metadata"), dict):
         raise StageExecutionError("resume checkpoint is missing metadata")
     metadata = blob["metadata"]
@@ -134,7 +140,9 @@ def load_resume_checkpoint(context: StageContext) -> tuple[Optional[dict[str, An
             )
     completed = metadata.get("steps")
     if isinstance(completed, bool) or not isinstance(completed, int) or completed < 0:
-        raise StageExecutionError("resume checkpoint metadata.steps must be non-negative")
+        raise StageExecutionError(
+            "resume checkpoint metadata.steps must be non-negative"
+        )
     if completed >= context.plan.target_steps:
         raise StageExecutionError(
             f"resume checkpoint already has {completed} steps; "
@@ -201,11 +209,15 @@ def write_result_metadata(result: StageResult) -> Path:
 
 def validate_result(result: StageResult, context: StageContext) -> None:
     if result.status != "pass":
-        raise StageExecutionError(f"adapter returned non-pass status: {result.status!r}")
+        raise StageExecutionError(
+            f"adapter returned non-pass status: {result.status!r}"
+        )
     if result.stage != context.plan.stage:
         raise StageExecutionError("adapter returned a result for the wrong stage")
     if result.config_digest != context.plan.config_digest:
-        raise StageExecutionError("adapter returned a result for the wrong config digest")
+        raise StageExecutionError(
+            "adapter returned a result for the wrong config digest"
+        )
     if result.seed != context.plan.seed or result.steps != context.plan.target_steps:
         raise StageExecutionError("adapter returned inconsistent seed/step metadata")
     if result.adapter_identity != context.plan.adapter_identity:

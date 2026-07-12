@@ -23,7 +23,7 @@ Run both supported conditioning routes without a model checkpoint:
 The example sends a precomputed `(..., 32)` latent directly through the
 no-bridge route and maps a `(..., 22)` robot-action tensor through a synthetic
 bridge. It produces model-ready `(..., 32)` tensors but does not invoke an
-external ACWM.
+ACWM runtime.
 
 Validate the non-null paths in a paper-budget config:
 

@@ -3,6 +3,7 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 DEST_ROOT="${CDLAM_DEPS_DIR:-$ROOT/.deps}"
+PYTHON="${PYTHON:-python3}"
 
 SAM3_URL="https://github.com/facebookresearch/sam3.git"
 SAM3_REV="8e451d5eb43c817b64ae7577fb7b9ae223db88a9"
@@ -21,7 +22,8 @@ License acceptance is explicit:
   base:    CDLAM_ACCEPT_BASE_LICENSE=yes
 
 Sources are cloned at revisions recorded in third_party/dependencies.lock.json.
-Nothing is vendored into the CD-LAM Git history.
+The ACWM command stages the bundled CD-LAM overlay into a separate runtime
+directory; third-party repositories are never added to CD-LAM Git history.
 EOF
 }
 
@@ -82,7 +84,16 @@ case "$target" in
       echo "Read the base ACWM license, then set CDLAM_ACCEPT_BASE_LICENSE=yes." >&2
       exit 2
     }
-    clone_at ACWM-base "$BASE_URL" "$BASE_REV" "$DEST_ROOT/acwm-base"
+    base_source="$DEST_ROOT/acwm-base-source"
+    runtime="$DEST_ROOT/acwm-runtime"
+    clone_at ACWM-base "$BASE_URL" "$BASE_REV" "$base_source"
+    if [[ -e "$runtime" ]]; then
+      "$PYTHON" "$ROOT/internal/tools/stage_acwm_runtime.py" \
+        --verify-existing --output "$runtime"
+    else
+      "$PYTHON" "$ROOT/internal/tools/stage_acwm_runtime.py" \
+        --base-git "$base_source" --output "$runtime"
+    fi
     ;;
   all)
     "$0" metrics

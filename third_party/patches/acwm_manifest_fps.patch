@@ -1,0 +1,24 @@
+diff --git a/lamwm_pipline/tools/train_wm_compat_real.py b/lamwm_pipline/tools/train_wm_compat_real.py
+--- a/lamwm_pipline/tools/train_wm_compat_real.py
++++ b/lamwm_pipline/tools/train_wm_compat_real.py
+@@ -1027,10 +1027,19 @@
+         for bi, arr in enumerate(arrs):
+             vid_t[bi] = torch.from_numpy(arr).to("cuda").permute(3, 0, 1, 2)
+ 
++        manifest_fps = []
++        for row in sampled_rows:
++            fps = float(row.get("fps", 0.0))
++            if not np.isfinite(fps) or fps <= 0.0:
++                raise RuntimeError(
++                    f"manifest row has invalid fps={row.get('fps')!r}: "
++                    f"{row.get('window_id', '<unknown>')}"
++                )
++            manifest_fps.append(fps)
+         data_batch = {
+             "dataset_name": "video_data",
+             "video": vid_t,
+-            "fps": torch.tensor([8] * bs, dtype=torch.float).cuda(),
++            "fps": torch.tensor(manifest_fps, dtype=torch.float).cuda(),
+             "padding_mask": torch.zeros(bs, 1, H_v, W_v).cuda(),
+             "num_conditional_frames": 1,
+             "action": a,

@@ -6,3 +6,6 @@
 *.yml text eol=lf
 *.md text eol=lf
 *.pdf binary
+*.png binary
+third_party/acwm_overlay/** -whitespace
+third_party/patches/*.patch -whitespace

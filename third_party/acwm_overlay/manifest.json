@@ -1,0 +1,410 @@
+{
+  "base_commit": "02f119b759d5c7f84a399fdeea3c6e82e7ed6cff",
+  "base_license": "Apache-2.0",
+  "base_repository": "https://github.com/NVIDIA/DreamDojo.git",
+  "overlay_license": "Apache-2.0",
+  "overlays": [
+    {
+      "bytes": 20795,
+      "operation": "added",
+      "path": "New LAM/Post Train/train_gbridge_z_posttrain.py",
+      "sha256": "eb674e12ded1dee5180f2df4abd6fdf944bcdf41fc86c7faeec1f4339de9ae08"
+    },
+    {
+      "bytes": 28207,
+      "operation": "added",
+      "path": "New LAM/iterations/_dist/train_a22z_frozen.py",
+      "sha256": "a50d1d432fa03b7f097aeb352dc4b700687629e6b00b91889e86b64ad3f17f1d"
+    },
+    {
+      "base_sha256": "aef2f0561b4baf32ac477f28d1f75c0efddb72c12fffd1dafe5c471300223efc",
+      "bytes": 4546,
+      "operation": "modified",
+      "path": "cosmos_predict2/_src/predict2/action/configs/action_conditioned/config.py",
+      "sha256": "a64af0d0d5c1070090dc0a009db0c26cf3a5951ebe54b5fd8866fcbd81d84c20"
+    },
+    {
+      "base_sha256": "4a8ddb4d107ed3c53161786354bbf43094548535fd3f95dbacb613bb1f2ff05c",
+      "bytes": 34604,
+      "operation": "modified",
+      "path": "cosmos_predict2/_src/predict2/action/configs/action_conditioned/experiment/exp_2B_action_conditioned_rectify_flow_gr00t.py",
+      "sha256": "97cfd3f70fdadb1fda48608ab9a970e81b4f43ceb6e4fe4173f4202ad9116830"
+    },
+    {
+      "base_sha256": "95228b4644f35f0a7b46e2a5d0b3025acd2fd4c84d78a57fc4ac7896a0295df3",
+      "bytes": 87894,
+      "operation": "modified",
+      "path": "cosmos_predict2/_src/predict2/networks/minimal_v4_dit.py",
+      "sha256": "4ce91689f38666a953aa74a71d526fb425a1de31250921d724532d7b4a3627c8"
+    },
+    {
+      "base_sha256": "1ea35d26198824e184cf244c609c669c4c4866c41df8e753f3eaaedc88de9b25",
+      "bytes": 12932,
+      "operation": "modified",
+      "path": "cosmos_predict2/experiments/base/action.py",
+      "sha256": "b3607ae9d214455a9271c7024ab31e4eeff379cd5df3f68eea90f725b7351403"
+    },
+    {
+      "bytes": 5685,
+      "operation": "added",
+      "path": "finetune_4-30/scripts/model.py",
+      "sha256": "54e3dc10895e85bf108d126565f56da9549f853cae401c971d48ddf0bd8dc2c5"
+    },
+    {
+      "bytes": 9387,
+      "operation": "added",
+      "path": "finetune_4-30/scripts/transforms.py",
+      "sha256": "fef0067302d18ee19fb419c0f9e179a664b6db298400e61a0b240b462b953108"
+    },
+    {
+      "base_sha256": "b8f149161cbaac5ac96a4b78009ea1fc6bcf59007f886ad557de0b5563533cca",
+      "bytes": 54157,
+      "operation": "modified",
+      "path": "groot_dreams/data/dataset.py",
+      "sha256": "7d25d6d0cbb1a09902c8b2d7a825bd3db224ff47c89e4a6d21c23389870461a5"
+    },
+    {
+      "base_sha256": "235419825d1d7b08d9013fd22a063d9942df49e27ae93af0ef727e6089feb0b7",
+      "bytes": 28036,
+      "operation": "modified",
+      "path": "groot_dreams/data/dataset_mano.py",
+      "sha256": "fa59bb828e5786aad294b64e0d3648fcf9d47f8224f947299279897749d025ba"
+    },
+    {
+      "base_sha256": "5d9477c632217d20d50fe21893fb7b0dd1d47f9117b375e7fbdab1fd6c217617",
+      "bytes": 6375,
+      "operation": "modified",
+      "path": "groot_dreams/data/dataset_video.py",
+      "sha256": "591239011e4ccf1e6cd4e9f689305ff009864910bf33b42e02e3f9f7b39e7898"
+    },
+    {
+      "base_sha256": "2268bd14b1b9c251c4cab6748a6439288ed56b505efb5678b586d3caf2947160",
+      "bytes": 139,
+      "operation": "modified",
+      "path": "groot_dreams/data/embodiment_tags.py",
+      "sha256": "210558d783efe6a626fc2b2e966bf8c58d1480158e3f28bbeb2a7b5050688237"
+    },
+    {
+      "base_sha256": "9222799ebe59d8752199827f1bb0d90e5b8bc4e6193bade477bf2bce835517da",
+      "bytes": 11661,
+      "operation": "modified",
+      "path": "groot_dreams/dataloader.py",
+      "sha256": "06ef2eef4486d80e0af4fb544296915ab0f3b0f98613cb98b0680caedabfff22"
+    },
+    {
+      "base_sha256": "d5635877da03ddafa109dd3b35d8d6f9af1686552705499ca2c4a1530a402ad3",
+      "bytes": 9818,
+      "operation": "modified",
+      "path": "groot_dreams/groot_configs.py",
+      "sha256": "49a4492848846232efff00334046712ac0bfd06baf1d95b9f49cbce3db475fdc"
+    },
+    {
+      "base_sha256": "d7df452902dd9a2b5be3c173262dd8cb6a7f20e844f1d65cf6a0180d3f8e3a8e",
+      "bytes": 7547,
+      "operation": "modified",
+      "path": "groot_dreams/utils/video.py",
+      "sha256": "95958cde4a182a8322b4210324c225c0564c9be0aaf590ad11ea223e775a935a"
+    },
+    {
+      "bytes": 0,
+      "operation": "added",
+      "path": "lamwm_pipline/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 23298,
+      "operation": "added",
+      "path": "lamwm_pipline/configs/lam_registry.yaml",
+      "sha256": "f2e70806ac74e1db9f1d73efa7b8e648b908416f7ad45e8726f365d016cccd06"
+    },
+    {
+      "bytes": 0,
+      "operation": "added",
+      "path": "lamwm_pipline/src/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 6696,
+      "operation": "added",
+      "path": "lamwm_pipline/src/lam_loader.py",
+      "sha256": "4a0a5da46ba7b52876a0b34e1791f31df7941b45aba51702d003c26f228e0c8b"
+    },
+    {
+      "bytes": 2923,
+      "operation": "added",
+      "path": "lamwm_pipline/src/registry.py",
+      "sha256": "544bcd014f2fe3ec583a0c952464035c14067d5eb0faffe90a80c826d2abae8d"
+    },
+    {
+      "bytes": 6945,
+      "operation": "added",
+      "path": "lamwm_pipline/src/video_preprocess.py",
+      "sha256": "db4321c8e1489a2c00fb9c2d2043e9e501636703709d5ddde897ebf04b1e632c"
+    },
+    {
+      "bytes": 0,
+      "operation": "added",
+      "path": "lamwm_pipline/tools/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 16308,
+      "operation": "added",
+      "path": "lamwm_pipline/tools/scope_ablation.py",
+      "sha256": "c7773da285fa6bd2a07d9683a31d9dfa6671642a39b1815cdfd103e3cf601e7e"
+    },
+    {
+      "bytes": 91471,
+      "operation": "added",
+      "path": "lamwm_pipline/tools/train_wm_compat_real.py",
+      "sha256": "52152584c440e40229539277cc9ef411d9806e0bfb9303e40eacbe1bf938b6a3"
+    },
+    {
+      "bytes": 8773,
+      "operation": "added",
+      "path": "lamwm_pipline/tools/z_usage_monitor.py",
+      "sha256": "72f609ceac54a289120586ee5f0b3ad31824566a1f4f5d49307f1b484517366b"
+    },
+    {
+      "bytes": 24061,
+      "operation": "added",
+      "path": "scripts/train_lerobot_robot_action_posttrain.py",
+      "sha256": "12efbc85cc32275b7f93cb6aebd8b01976c8422a6611dc528686a80524d050b8"
+    },
+    {
+      "bytes": 0,
+      "operation": "added",
+      "path": "training_scope/LAM/V2/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "operation": "added",
+      "path": "training_scope/LAM/V2/tools/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 5972,
+      "operation": "added",
+      "path": "training_scope/LAM/V2/tools/_lam_v2_forward.py",
+      "sha256": "4bac3852782e61f1aaf443ec3b8a24a6484c450a0ac74d2c6c4cee28f8f62d77"
+    },
+    {
+      "bytes": 15026,
+      "operation": "added",
+      "path": "training_scope/LAM/V2/tools/eval_lam_v2_full.py",
+      "sha256": "6ffb9c7a182610e67019b39409ae6744a75dfb52ca5297af947703b51ca5523d"
+    },
+    {
+      "bytes": 21652,
+      "operation": "added",
+      "path": "training_scope/LAM/V2/tools/eval_lam_v2_g1.py",
+      "sha256": "8f2a5476c687958d3df5ce4eec5a1613dfe5411e510470569f616cff6522c5b0"
+    },
+    {
+      "bytes": 15399,
+      "operation": "added",
+      "path": "training_scope/LAM/V2/tools/run_action_metric_probe.py",
+      "sha256": "d3889ad7cce1eb2afc544d1b8a3c27318171cb1eddf82791da9e8128e2349f7b"
+    },
+    {
+      "bytes": 11254,
+      "operation": "added",
+      "path": "training_scope/LAM/V2/tools/run_guardrail_probe.py",
+      "sha256": "28bb790e331c8bcb136f41412b5767a50349fa2a37a99e273ee7aed02652e30d"
+    },
+    {
+      "bytes": 20874,
+      "operation": "added",
+      "path": "training_scope/LAM/V2/tools/train_lam_action_readout.py",
+      "sha256": "d808249054984b72dba919162e7bfe17526c41b907d4e807138f840e6c834a59"
+    },
+    {
+      "bytes": 20234,
+      "operation": "added",
+      "path": "training_scope/LAM/V2/tools/train_lam_residual_adapter.py",
+      "sha256": "ab8bfa5f4d6d1532f5bbed20577104b42b7f3bd81655d6454006b5ccbf5cb775"
+    },
+    {
+      "bytes": 47277,
+      "operation": "added",
+      "path": "training_scope/LAM/V2/tools/train_lam_v2_f1.py",
+      "sha256": "ea526832c07daeff0ee8eda75f830cd417c13fe099a47fc8ffe019a3e710762a"
+    },
+    {
+      "bytes": 47612,
+      "operation": "added",
+      "path": "training_scope/LAM/V2/tools/train_lam_v2_g1.py",
+      "sha256": "eac58a61372a5ecbd67765350d52ced55e5876ccf88bc0a6514a325d55b061bb"
+    },
+    {
+      "bytes": 0,
+      "operation": "added",
+      "path": "training_scope/LAM/V3/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "operation": "added",
+      "path": "training_scope/LAM/V3/tools/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 21129,
+      "operation": "added",
+      "path": "training_scope/LAM/V3/tools/_lam_v3_data.py",
+      "sha256": "67adbed71e38dce8b8eda99c8ff615322741caafdef2a967804c2ddb889ece5b"
+    },
+    {
+      "bytes": 19585,
+      "operation": "added",
+      "path": "training_scope/LAM/V3/tools/_lam_v3_losses.py",
+      "sha256": "c5248feed85ea92869d2bd64c3e1187143c78bdf66251b22e4fae5bb07bdc7d3"
+    },
+    {
+      "bytes": 15564,
+      "operation": "added",
+      "path": "training_scope/LAM/V3/tools/_lam_v3_v4_losses.py",
+      "sha256": "9e8886498c9c2c6976418305915cd2bf6cc75b56b453d28827f4948ba5d558d1"
+    },
+    {
+      "bytes": 0,
+      "operation": "added",
+      "path": "training_scope/LAM/V4/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "operation": "added",
+      "path": "training_scope/LAM/V4/tools/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 7109,
+      "operation": "added",
+      "path": "training_scope/LAM/V4/tools/_lam_v4_data.py",
+      "sha256": "a75264cf7072e30fe3169a929d543817df74b359756553bd502a8b159a4d4817"
+    },
+    {
+      "bytes": 27171,
+      "operation": "added",
+      "path": "training_scope/LAM/V4/tools/_lam_v4_losses.py",
+      "sha256": "1fa767f5d6c13aa8e788e1e6cad0d6d95834c2d8d15470cdb64a3a1b4c49031b"
+    },
+    {
+      "bytes": 0,
+      "operation": "added",
+      "path": "training_scope/LAM/V5/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "operation": "added",
+      "path": "training_scope/LAM/V5/tools/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 4199,
+      "operation": "added",
+      "path": "training_scope/LAM/V5/tools/_lam_v5_data.py",
+      "sha256": "2bfe659abe2f34de6bf780dd16763616481bac936966751fdda0f65cb4072c54"
+    },
+    {
+      "bytes": 3947,
+      "operation": "added",
+      "path": "training_scope/LAM/V5/tools/_lam_v5_losses.py",
+      "sha256": "ce253c370b4c56a43e4b8c2ed57cc836c1351c673f98fd8430836397f9dded19"
+    },
+    {
+      "bytes": 94323,
+      "operation": "added",
+      "path": "training_scope/LAM/V5/tools/train_lam_v5.py",
+      "sha256": "9105a22f6d0316c85051e4df75ce973eaf6ee9bbd39f06591cec52df1777cae8"
+    },
+    {
+      "bytes": 252,
+      "operation": "added",
+      "path": "training_scope/LAM/V6/__init__.py",
+      "sha256": "3ea118cd3c39faa01ec0276ea47a01fafa4324e0cc24bb7dd50e0edd10ab197f"
+    },
+    {
+      "bytes": 30,
+      "operation": "added",
+      "path": "training_scope/LAM/V6/tools/__init__.py",
+      "sha256": "8e91245c3ec8b6ec2453d4e39243fb6d68c2e8c58745d32dfaab5214dd095d8d"
+    },
+    {
+      "bytes": 25633,
+      "operation": "added",
+      "path": "training_scope/LAM/V6/tools/_lam_v6_data.py",
+      "sha256": "001146f2c685b38fba59f37f2014b88dfd9db18c1ac9aaf02dfcc85d18cab40b"
+    },
+    {
+      "bytes": 65,
+      "operation": "added",
+      "path": "training_scope/LAM/V6_1/__init__.py",
+      "sha256": "df8d9cd668cc365c424604fd4492312f6cd54accc7817b382b89cbeaa36ce427"
+    },
+    {
+      "bytes": 66,
+      "operation": "added",
+      "path": "training_scope/LAM/V6_1/tools/__init__.py",
+      "sha256": "94e5fdc4d23958f4caedd9ddbf83c662ab2325a9ae7eb4812d7ef15581c9e9c6"
+    },
+    {
+      "bytes": 1653,
+      "operation": "added",
+      "path": "training_scope/LAM/V7/tools/_lam_alias_shim.py",
+      "sha256": "263c9948f9e0cfb7e680ed486c8f4762da957577eff317b30eae913006276f74"
+    },
+    {
+      "bytes": 4569,
+      "operation": "added",
+      "path": "training_scope/LAM/V7/tools/_lam_v7_ctx.py",
+      "sha256": "16549782782dd3378916ad6191c8cb891b00a9e67a41e3e986e715feadb86a1b"
+    },
+    {
+      "bytes": 7583,
+      "operation": "added",
+      "path": "training_scope/LAM/V7/tools/probe_ee_vs_joint.py",
+      "sha256": "7eec2fd7d2189d9eb9bc3b50d9895f3500da1be31c636ae70ea1d7420551101f"
+    },
+    {
+      "bytes": 4478,
+      "operation": "added",
+      "path": "training_scope/LAM/V7/tools/probe_idm_upper_bound.py",
+      "sha256": "618fb2a9bd7411a2dfadec13c24e67851d446061932ea25947d5702c1decef9f"
+    },
+    {
+      "bytes": 8294,
+      "operation": "added",
+      "path": "training_scope/LAM/V7/tools/train_v7_cached.py",
+      "sha256": "4cfbc8b5bb07bcc0f3a5800fdd4c87fe3fbaf00c90a6423332346ff287c29abb"
+    }
+  ],
+  "publication_status": "bundled",
+  "required_runtime_paths": [
+    "external/lam/model.py",
+    "finetune_4-30/scripts/transforms.py",
+    "groot_dreams/dataloader.py",
+    "lamwm_pipline/tools/train_wm_compat_real.py",
+    "New LAM/iterations/_dist/train_a22z_frozen.py",
+    "New LAM/Post Train/train_gbridge_z_posttrain.py",
+    "scripts/train_lerobot_robot_action_posttrain.py",
+    "shared_meta/AgiBot_modality.json",
+    "shared_meta/AgiBot_stats.json",
+    "training_scope/LAM/V7/tools/_lam_alias_shim.py"
+  ],
+  "runtime_id": "cdlam-acwm-runtime",
+  "runtime_tree": {
+    "algorithm": "path-size-sha256-v1",
+    "bytes": 28277077,
+    "files": 737,
+    "sha256": "7fd77f59feb3f686d6568551fa5ad9361a8ad4ca011942bf85f5d8ba9c4b5ed9"
+  },
+  "schema_version": 1,
+  "validators": [
+    "internal/runtime/validate_eval_source.py",
+    "internal/runtime/validate_stage2_source.py"
+  ]
+}

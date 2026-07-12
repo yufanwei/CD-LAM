@@ -1,11 +1,14 @@
 # Training correctness and release gates
 
 > **Status: paper-equivalent training is not yet accepted.** CPU integration
-> gates pass, and the internal Stage-3 adapter now has tested working-directory
-> and action-coordinate fixes. The available artifacts still do not establish
-> a complete Stage-1/2/3 paper lineage or a real GPU smoke/resume run. Do not
-> claim end-to-end reproduction until every acceptance gate in this document
-> passes.
+> gates pass, and the bundled 2B runtime has tested working-directory and
+> action-coordinate fixes. One linked H100 invocation completed a real
+> optimizer update in Stage 1, Stage 2, and Stage 3 and trained a new bridge;
+> Stage 2 used the newly written Stage-1 checkpoint, and Stage 3 used the newly
+> written Stage-2 checkpoint plus that bridge. This establishes execution and
+> smoke-scale lineage, not checkpoint resume, convergence, or a complete
+> paper-budget lineage. Do not claim end-to-end paper reproduction until every
+> acceptance gate in this document passes.
 
 This document separates two kinds of evidence:
 
@@ -41,15 +44,15 @@ optimizer updates, not filenames, samples, epochs, or logging events.
 data, and checkpoints from explicit configuration. It must not depend on the
 shell's current directory or an unrecorded checkout layout.
 
-**Observed artifact state.** The audited Stage-3 path relies on being launched
-from a particular upstream source checkout. Relative imports and/or resource
-lookups change when it is launched from the public repository or another
-working directory.
+**Historical artifact state.** The pre-release Stage-3 path relied on being
+launched from a particular upstream source checkout. Relative imports and
+resource lookups could change with the shell working directory.
 
-**Implemented mitigation.** The internal adapter resolves the external entry
+**Implemented mitigation.** The bundled wrapper resolves the upstream entry
 by absolute path, validates its resource root, changes working directory only
 for the external call, and restores the caller's directory. CPU tests verify
-that behavior. A real one-update GPU run and resume remain required acceptance
+that behavior, and the linked 2B smoke completed the real one-update Stage-3
+path from the public wrapper. Checkpoint resume remains required acceptance
 evidence.
 
 **Why this blocks training.** A command may fail immediately, import a
@@ -74,19 +77,20 @@ the same physical action representation before the bridge's saved
 `action_mean/action_std` transform. The 22D shape alone is not a semantic
 contract; see [`DATA.md`](DATA.md) and [`CHECKPOINTS.md`](CHECKPOINTS.md).
 
-**Observed artifact state.** The audited bridge-training cache uses a
+**Historical artifact state.** The audited bridge-training cache used a
 stride-four difference in the raw action coordinates, while the audited
 Stage-3 loader forms stride-four block differences after applying the
 dataset-side min-max normalization. The bridge then has its own saved action
-standardization. No verified equivalence currently connects these two input
-coordinates.
+standardization. Shape checks alone did not establish equivalence between
+those two input coordinates.
 
 **Implemented mitigation.** The public action utility and internal adapter now
 first-difference each four-token cumulative block and multiply by
 `(action_max - action_min) / 2` before bridge standardization. Golden synthetic
 transitions, pinned statistics/layout metadata, and real-asset CPU comparisons
 validate the conversion. The bridge remains tied to its recorded LAM and
-action metadata, and Stage-3 GPU acceptance is still outstanding.
+action metadata. Stage-3 action routing completed in the one-update 2B GPU
+smoke; paper-budget action-following evidence is still outstanding.
 
 **Why this blocks training.** Raw-coordinate differences and differences in a
 min-max-normalized coordinate system are not interchangeable unless the exact
@@ -116,14 +120,21 @@ backbone, consume latents from `stage1_lam_final`, train the declared parameter
 scope for 2,000 optimizer updates, and produce the exact state used to
 initialize Stage 3. Temporal windows must use verified source timing.
 
-**Observed artifact state.** The audited Stage-2 config, checkpoint evidence,
-and status/verdict do not agree on all of the following:
+**Historical artifact state.** Earlier Stage-2 configs, checkpoint evidence,
+and status labels did not agree on all of the following:
 
 - which Stage-1 LAM and ACWM initialization define the lineage;
 - which model parameters are actually trainable;
 - whether the artifact is a smoke/progress result or a completed Stage-2 run;
 - source FPS, which is hardcoded in the observed loader path rather than
   derived from validated per-source metadata.
+
+**Implemented mitigation.** The real wrapper now generates a LAM registry for
+the exact produced Stage-1 checkpoint, decodes windows from manifest records
+with validated FPS metadata, records trainable scope and finite update
+statistics, and passes the produced Stage-2 checkpoint directly to Stage 3.
+The linked one-update H100 run exercised this handoff. It remains a smoke run,
+not the required 2,000-update accepted artifact.
 
 **Why this blocks training.** Stage 3 may initialize from a model that was not
 debiased with the intended LAM or parameter scope. A hardcoded FPS can also
@@ -155,11 +166,17 @@ shapes.
 action-centric contrast, and latent-space calibration active. Stage 2 must
 consume that accepted output.
 
-**Observed artifact state.** The audited available Stage-1 artifact represents
-150 optimizer updates, not the 1,000-update paper budget.
-Downstream artifact paths are also selected statically rather than being
-resolved from the current Stage-1 output, so rerunning Stage 1 does not prove
-that Stage 2 consumes the new result.
+**Historical artifact state.** The audited 100h Stage-1 research artifact
+represents about 150 optimizer updates, not the 1,000-update paper budget.
+Earlier downstream launchers also selected parent paths statically.
+
+**Implemented mitigation.** The bundled `pipeline` command discovers the
+checkpoint written by the current Stage-1 run, generates the Stage-2 registry
+from that exact path, trains and binds a bridge to the same checkpoint, and
+then passes the newly written Stage-2 checkpoint and bridge to Stage 3. The
+linked H100 smoke verified this dynamic handoff. It does not turn a one-update
+checkpoint or the historical partial artifact into the 1,000-update paper
+output.
 
 **Why this blocks training.** A short progress checkpoint is not the main paper
 checkpoint. Static stage chaining can silently run Stage 2 against an older
@@ -205,11 +222,14 @@ evidence and a failing condition returns a nonzero exit status.
 ### G3. Stage smoke and resume
 
 - Stage 1, Stage 2, and Stage 3 each complete one real optimizer update on the
-  declared device path.
+  declared device path. **Passed for the recorded 2B H100 smoke.**
 - Each stage writes a loadable checkpoint and resumes for one more update.
-- Trainable-parameter and gradient audits match the declared scope.
+  **Checkpoint writes passed; resume remains open.**
+- Trainable-parameter and gradient audits match the declared scope. **The
+  one-update smoke recorded finite gradients and parameter counts; a resumed
+  update audit remains open.**
 - Outputs are finite, and failures cannot be converted into a success verdict
-  by the launcher.
+  by the launcher. **Passed for the one-update smoke validators.**
 
 ### G4. Paper-budget completion
 
@@ -242,13 +262,17 @@ evidence and a failing condition returns a nonzero exit status.
 
 ## Current decision
 
-B1 and B2 have CPU-validated code mitigations but still require the real GPU
-smoke/resume evidence in G3. B3 and B4 remain unresolved for a paper-complete
-lineage. Therefore:
+B1 and B2 have CPU validation and a linked one-update 2B GPU path check. The
+runtime mitigations for B3 and B4 also passed at smoke scale: the generated
+registry, new bridge, and new Stage-2 output were chained in one invocation.
+Resume, paper-budget completion, quality evaluation, and accepted artifact
+provenance remain open. Therefore:
 
 - the core objective, bridge, and FDCE primitives may remain available for
   testing and integration work;
 - protocol configs and manuscript result fixtures remain documentation, not
   proof of a completed training pipeline;
-- real Stage-1/2/3 training, public checkpoint promotion, and end-to-end
-  reproduction claims are blocked until G1–G6 pass.
+- the bundled real Stage-1/2/3 commands may be used for research and clearly
+  labeled smoke or partial artifacts may be distributed;
+- promotion to a paper-complete checkpoint role and end-to-end reproduction
+  claims remain blocked until G1–G6 pass.

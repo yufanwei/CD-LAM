@@ -18,7 +18,7 @@ help:
 	@echo "  make train-smoke   Run all four synthetic training stages on CPU"
 	@echo "  make wheel         Build the wheel into dist/"
 
-check: release-check lint test smoke data-smoke train-smoke
+check: release-check lint test smoke data-smoke train-smoke wheel
 
 release-check:
 	$(PYTHON) scripts/release_check.py --strict

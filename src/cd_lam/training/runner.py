@@ -53,11 +53,7 @@ def _configured_upstream_artifacts(
             "stage2_acwm": config.paths.stage2_acwm,
         },
     }
-    return {
-        role: path
-        for role, path in candidates[stage].items()
-        if path is not None
-    }
+    return {role: path for role, path in candidates[stage].items() if path is not None}
 
 
 def execute_stage(

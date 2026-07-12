@@ -1,0 +1,62 @@
+{
+  "schema_version": 1,
+  "workspace": "..",
+  "paths": {
+    "python": ".deps/model-env/bin/python",
+    "torchrun": ".deps/model-env/bin/torchrun",
+    "acwm_root": ".deps/acwm-runtime",
+    "hf_home": ".cache/huggingface",
+    "base_lam_checkpoint": "models/external/lam/model.pt",
+    "base_world_checkpoint": "models/external/world-model/model",
+    "stage1_recipe": "configs/stage1_recipe.yaml",
+    "stage1_train_index": "data/prepared/stage1/train.parquet",
+    "stage1_eval_index": "data/prepared/stage1/eval.parquet",
+    "bridge_cache": "data/prepared/bridge/action_pairs.npz",
+    "stage2_manifest": "data/prepared/stage2/train.parquet",
+    "stage3_dataset_list": "data/prepared/stage3/train.yaml",
+    "action_contract": "configs/action_contract.json",
+    "stage1_checkpoint": "models/lam/model.pt",
+    "bridge_checkpoint": "models/bridge/action_to_latent.pt",
+    "stage2_checkpoint": "models/pretrain/model.pt",
+    "output_root": "outputs"
+  },
+  "launch": {
+    "gpus": "0",
+    "processes": 1,
+    "seed": 42
+  },
+  "validation": {
+    "smoke": false
+  },
+  "stage1": {
+    "steps": 1000,
+    "skip_eval": false,
+    "evaluation": {
+      "pairs_real": 200,
+      "pairs_identity": 80,
+      "pairs_per_primitive": 40,
+      "reconstruction_tiles": 4
+    }
+  },
+  "bridge": {
+    "pairs": 0,
+    "epochs": 300,
+    "encoder_batch_size": 64
+  },
+  "stage2": {
+    "steps": 2000,
+    "batch_size": 12,
+    "learning_rate": 0.00001,
+    "conditioning_dropout": 0.1,
+    "save_every": 20
+  },
+  "stage3": {
+    "steps": 3000,
+    "batch_size": 11,
+    "learning_rate": 0.000025,
+    "warmup_steps": 1000,
+    "save_every": 500,
+    "eval_every": 500,
+    "parallelism": "manual-ddp"
+  }
+}

@@ -34,7 +34,6 @@ authors:
 preferred-citation:
   type: article
   title: "Causally Debiased Latent Action Model for Embodied Action Conditioned World Models"
-  year: 2026
   authors:
     - given-names: Yufan
       family-names: Wei

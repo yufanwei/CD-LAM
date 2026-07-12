@@ -96,7 +96,9 @@ _OUTPUT_NAMES = {
 }
 
 
-def _asset_requirements(config: PipelineConfig, stage: StageName) -> tuple[AssetRequirement, ...]:
+def _asset_requirements(
+    config: PipelineConfig, stage: StageName
+) -> tuple[AssetRequirement, ...]:
     paths = config.paths
     selected: tuple[tuple[str, Optional[Path]], ...] = {
         StageName.STAGE1: (
@@ -191,7 +193,11 @@ def build_stage_plan(
     if isinstance(steps, bool) or not isinstance(steps, int) or steps < 1:
         raise PlanError("target_steps must be a positive integer")
     selected_seed = config.runtime.seed if seed is None else seed
-    if isinstance(selected_seed, bool) or not isinstance(selected_seed, int) or selected_seed < 0:
+    if (
+        isinstance(selected_seed, bool)
+        or not isinstance(selected_seed, int)
+        or selected_seed < 0
+    ):
         raise PlanError("seed must be a non-negative integer")
     selected_device = device or ("cpu" if synthetic else config.runtime.device)
     if synthetic and selected_device != "cpu":
@@ -202,7 +208,7 @@ def build_stage_plan(
     adapter_identity = "cd_lam.synthetic_cpu" if synthetic else None
     required_assets = () if synthetic else _asset_requirements(config, stage)
     blockers = _checkpoint_blockers(stage_config)
-    selected_resume = (resume_from or stage_config.resume_from)
+    selected_resume = resume_from or stage_config.resume_from
     if selected_resume is not None:
         selected_resume = selected_resume.expanduser().resolve()
         if not selected_resume.is_file():
@@ -230,7 +236,9 @@ def build_stage_plan(
             blockers.extend(_transform_blockers(config))
         if stage == StageName.STAGE3:
             if config.stage3.working_directory is None:
-                blockers.append("stage3.working_directory is required for an external adapter")
+                blockers.append(
+                    "stage3.working_directory is required for an external adapter"
+                )
             elif not config.stage3.working_directory.is_dir():
                 blockers.append(
                     "stage3.working_directory is not a directory: "

@@ -61,7 +61,9 @@ def _as_visibility(
     if visibility.dtype == np.bool_:
         visible = visibility.copy()
     else:
-        if not np.issubdtype(visibility.dtype, np.number) or np.iscomplexobj(visibility):
+        if not np.issubdtype(visibility.dtype, np.number) or np.iscomplexobj(
+            visibility
+        ):
             raise TypeError(f"{name} must be boolean or real-valued confidence scores")
         visible = np.isfinite(visibility) & (visibility >= threshold)
     return np.asarray(visible & finite_coordinates, dtype=bool)
@@ -111,7 +113,10 @@ def pairwise_displacement_costs(
         raise ValueError("visibility_threshold must be finite")
     if not np.isfinite(min_visible_fraction) or not 0 <= min_visible_fraction <= 1:
         raise ValueError("min_visible_fraction must lie in [0, 1]")
-    if isinstance(min_common_frames, bool) or int(min_common_frames) != min_common_frames:
+    if (
+        isinstance(min_common_frames, bool)
+        or int(min_common_frames) != min_common_frames
+    ):
         raise ValueError("min_common_frames must be a positive integer")
     min_common_frames = int(min_common_frames)
     if min_common_frames < 1:
@@ -156,9 +161,7 @@ def pairwise_displacement_costs(
         axis=-1,
     )
     jointly_visible = (
-        generated_vis[1:, :, None]
-        & reference_vis[1:, None, :]
-        & np.isfinite(distances)
+        generated_vis[1:, :, None] & reference_vis[1:, None, :] & np.isfinite(distances)
     )
     counts = jointly_visible.sum(axis=0)
     sums = np.where(jointly_visible, distances, 0.0).sum(axis=0)
@@ -180,10 +183,14 @@ def symmetric_chamfer_from_costs(pair_costs: ArrayLike) -> tuple[float, float, f
     finite = np.isfinite(costs)
     if not finite.any(axis=1).all():
         bad = np.flatnonzero(~finite.any(axis=1)).tolist()
-        raise ValueError(f"generated track(s) have no valid reference comparison: {bad}")
+        raise ValueError(
+            f"generated track(s) have no valid reference comparison: {bad}"
+        )
     if not finite.any(axis=0).all():
         bad = np.flatnonzero(~finite.any(axis=0)).tolist()
-        raise ValueError(f"reference track(s) have no valid generated comparison: {bad}")
+        raise ValueError(
+            f"reference track(s) have no valid generated comparison: {bad}"
+        )
 
     safe = np.where(finite, costs, np.inf)
     generated_to_reference = float(safe.min(axis=1).mean())
@@ -214,7 +221,9 @@ def foreground_displacement_chamfer_error(
         min_visible_fraction=min_visible_fraction,
         min_common_frames=min_common_frames,
     )
-    score, generated_to_reference, reference_to_generated = symmetric_chamfer_from_costs(costs)
+    score, generated_to_reference, reference_to_generated = (
+        symmetric_chamfer_from_costs(costs)
+    )
     if not return_details:
         return score
     return FDCEResult(
