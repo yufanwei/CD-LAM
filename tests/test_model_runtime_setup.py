@@ -43,8 +43,11 @@ def test_model_runtime_lock_records_proven_stack() -> None:
     assert lock["critical_distributions"]["packaging"] == "25.0"
     assert lock["critical_distributions"]["opencv-python"] == "4.11.0.86"
     assert lock["critical_distributions"]["opencv-python-headless"] == "4.11.0.86"
+    assert lock["critical_distributions"]["h5py"] == "3.16.0"
     assert lock["critical_distributions"]["lightning"] == "2.6.5"
     assert lock["critical_distributions"]["pytorch-lightning"] == "2.6.5"
+    assert "groot_dreams.dataloader" in lock["required_modules"]
+    assert "h5py" in lock["required_modules"]
     assert "lightning" in lock["required_modules"]
     assert {
         (

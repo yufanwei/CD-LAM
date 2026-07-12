@@ -56,17 +56,18 @@ The command performs four fail-closed operations:
    `uv.lock`;
 3. bootstraps `uv==0.9.7` in a disposable temporary environment and runs the
    upstream lock with `--no-dev --extra cu128` into `.deps/model-env`;
-4. installs the exact Lightning runtime supplements and PyTorch3D source
-   revision omitted by the upstream project metadata, deterministically places
-   the locked headless OpenCV payload last, then runs the model-environment
-   doctor.
+4. installs the exact HDF5, Lightning, and PyTorch3D runtime supplements
+   omitted by the upstream project metadata, deterministically places the
+   locked headless OpenCV payload last, then runs the model-environment doctor.
 
-The staged LAM implementation imports Lightning, but the pinned upstream
-project graph does not declare it. CD-LAM therefore locks `lightning`,
+The staged LAM implementation imports Lightning, and the Stage-2 data module
+imports HDF5 support, but the pinned upstream project graph does not declare
+either runtime edge. CD-LAM therefore locks `h5py`, `lightning`,
 `pytorch-lightning`, `lightning-utilities`, and `torchmetrics` to the versions
 used by the validated runtime. They are installed without changing the
-upstream-resolved CUDA graph, and the doctor checks both their metadata and a
-real `lightning` import.
+upstream-resolved CUDA graph. The doctor checks their metadata, imports HDF5
+and Lightning directly, and imports `groot_dreams.dataloader` to exercise the
+same transitive data-module path used while Stage 2 loads its configuration.
 
 CD-LAM uses only `pytorch3d.transforms` for rotation conversion. Disabling the
 optional PyTorch3D C++/CUDA operators avoids an undeclared compiler/toolkit
