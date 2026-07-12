@@ -82,6 +82,16 @@ def test_runtime_environment_declares_cdlam_namespace(tmp_path: Path) -> None:
     assert env["CDLAM_ACWM_ROOT"] == str(tmp_path / "acwm")
 
 
+def test_world_model_doctor_imports_transitive_data_runtime() -> None:
+    stage2 = runtime_module._runtime_import_modules(("stage2",))
+    stage3 = runtime_module._runtime_import_modules(("stage3",))
+    assert "groot_dreams.dataloader" in stage2
+    assert "groot_dreams.dataloader" in stage3
+    assert "groot_dreams.dataloader" not in runtime_module._runtime_import_modules(
+        ("stage1",)
+    )
+
+
 def test_generated_registry_has_public_ids(tmp_path: Path) -> None:
     profile = _profile(tmp_path, tmp_path / "acwm")
     config = RuntimeConfig.load(profile)

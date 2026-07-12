@@ -30,6 +30,9 @@ def _lock() -> dict[str, object]:
 
 def test_model_runtime_lock_records_proven_stack() -> None:
     lock = _lock()
+    extra_lock = (ROOT / "configs/model_runtime.extra.lock.txt").read_text(
+        encoding="utf-8"
+    )
     assert lock["profile"] == "linux-x86_64-cpython310-cu128-torch27"
     assert lock["installer"] == {
         "uv_version": "0.9.7",
@@ -44,6 +47,7 @@ def test_model_runtime_lock_records_proven_stack() -> None:
     assert lock["critical_distributions"]["opencv-python"] == "4.11.0.86"
     assert lock["critical_distributions"]["opencv-python-headless"] == "4.11.0.86"
     assert lock["critical_distributions"]["h5py"] == "3.16.0"
+    assert extra_lock.splitlines().count("h5py==3.16.0") == 1
     assert lock["critical_distributions"]["lightning"] == "2.6.5"
     assert lock["critical_distributions"]["pytorch-lightning"] == "2.6.5"
     assert "groot_dreams.dataloader" in lock["required_modules"]

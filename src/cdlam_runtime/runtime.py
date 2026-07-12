@@ -334,6 +334,32 @@ def _validate_contract_assets(config: RuntimeConfig, acwm: Path) -> None:
             raise RuntimeError(f"{label} SHA256 does not match the action contract")
 
 
+def _runtime_import_modules(stages: Sequence[str]) -> list[str]:
+    """Return the CPU-safe import closure exercised by the runtime doctor."""
+
+    modules = ["torch", "numpy", "yaml"]
+    if "stage1" in stages:
+        modules.extend(
+            [
+                "cdlam_runtime.entries.stage1",
+                "cdlam_runtime.entries.stage1_eval",
+                "external.lam.model",
+            ]
+        )
+    if "stage2" in stages or "stage3" in stages:
+        modules.extend(["cosmos_cuda", "cosmos_predict2", "groot_dreams.dataloader"])
+    if "stage2" in stages:
+        modules.extend(
+            [
+                "cdlam_runtime.entries.stage2",
+                "lamwm_pipline.tools.train_wm_compat_real",
+            ]
+        )
+    if "stage3" in stages:
+        modules.append("cdlam_runtime.entries.stage3")
+    return modules
+
+
 def doctor(
     config: RuntimeConfig,
     stage: str,
@@ -434,31 +460,13 @@ def doctor(
     if imports and not errors:
         env = runtime_environment(config, selected_lam)
         env["CUDA_VISIBLE_DEVICES"] = ""
-        modules = ["torch", "numpy", "yaml"]
+        modules = _runtime_import_modules(stages)
         scripts: list[Path] = []
-        if "stage1" in stages:
-            modules.extend(
-                [
-                    "cdlam_runtime.entries.stage1",
-                    "cdlam_runtime.entries.stage1_eval",
-                    "external.lam.model",
-                ]
-            )
         if "bridge" in stages:
             scripts.append(
                 acwm / "New LAM" / "iterations" / "_dist" / "train_a22z_frozen.py"
             )
-        if "stage2" in stages or "stage3" in stages:
-            modules.extend(["cosmos_cuda", "cosmos_predict2"])
-        if "stage2" in stages:
-            modules.extend(
-                [
-                    "cdlam_runtime.entries.stage2",
-                    "lamwm_pipline.tools.train_wm_compat_real",
-                ]
-            )
         if "stage3" in stages:
-            modules.append("cdlam_runtime.entries.stage3")
             scripts.append(
                 acwm / "New LAM" / "Post Train" / "train_gbridge_z_posttrain.py"
             )
