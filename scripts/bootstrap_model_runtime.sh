@@ -84,10 +84,6 @@ assert platform.system() == "Linux"
 assert platform.machine() == "x86_64"
 assert parts(platform.libc_ver()[1]) >= (2, 35)
 PY
-"$PYTHON" -m venv --help >/dev/null 2>&1 || fail "the Python venv module is unavailable"
-command -v git >/dev/null 2>&1 || fail "git is required"
-command -v ffmpeg >/dev/null 2>&1 || fail "ffmpeg is required"
-
 absolute_path() {
   "$PYTHON" - "$1" <<'PY'
 import sys
@@ -153,6 +149,10 @@ if [[ "$DRY_RUN" == yes ]]; then
     "$ROOT/scripts/model_runtime_doctor.py" "$MODEL_ENV" "$ACWM_ROOT"
   exit 0
 fi
+
+"$PYTHON" -m venv --help >/dev/null 2>&1 || fail "the Python venv module is unavailable"
+command -v git >/dev/null 2>&1 || fail "git is required"
+command -v ffmpeg >/dev/null 2>&1 || fail "ffmpeg is required"
 
 if [[ ! -d "$ACWM_ROOT" ]]; then
   [[ "${CDLAM_ACCEPT_BASE_LICENSE:-}" == yes ]] || fail \

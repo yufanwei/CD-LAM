@@ -4,6 +4,8 @@ import copy
 import hashlib
 import importlib.util
 import json
+import os
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -278,9 +280,16 @@ def test_required_module_check_uses_real_import_results(tmp_path: Path) -> None:
 def test_bootstrap_dry_run_is_non_mutating(tmp_path: Path) -> None:
     environment = tmp_path / "model-env"
     dependencies = tmp_path / "deps"
+    tool_bin = tmp_path / "tool-bin"
+    tool_bin.mkdir()
+    dirname = shutil.which("dirname")
+    assert dirname is not None
+    (tool_bin / "dirname").symlink_to(dirname)
+    clean_environment = os.environ.copy()
+    clean_environment["PATH"] = str(tool_bin)
     result = subprocess.run(
         [
-            "bash",
+            "/bin/bash",
             str(ROOT / "scripts/bootstrap_model_runtime.sh"),
             "--dry-run",
             "--python",
@@ -293,7 +302,14 @@ def test_bootstrap_dry_run_is_non_mutating(tmp_path: Path) -> None:
         check=False,
         capture_output=True,
         text=True,
+        env=clean_environment,
     )
+    if sys.version_info[:2] != (3, 10):
+        assert result.returncode == 2
+        assert "requires CPython 3.10" in result.stderr
+        assert not environment.exists()
+        assert not dependencies.exists()
+        return
     assert result.returncode == 0, result.stderr
     assert "uv 0.9.7 sync --locked --no-dev --extra cu128" in result.stdout
     assert "install locked runtime supplements" in result.stdout
