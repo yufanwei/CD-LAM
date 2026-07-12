@@ -51,11 +51,11 @@ CD-LAM/
 - Private experiment reports, raw rollout videos, caches, or machine-specific
   launch settings.
 
-The compact Hugging Face upload candidate contains exactly three main 2B
-research entries plus the posttraining bridge and action contract. It has been
-validated locally, but it has not yet replaced the legacy layout at the
-[Hugging Face repository](https://huggingface.co/yufanwei/CD-LAM). After an
-immutable compact-release revision is published, its machine-readable
-`asset_manifest.json` is authoritative for filenames, tensor roles, sizes,
-SHA-256 values, and compatibility metadata. The source-tree manifest does not
-duplicate that model-asset index.
+The compact [Hugging Face repository](https://huggingface.co/yufanwei/CD-LAM)
+contains exactly three main 2B research entries plus the posttraining bridge
+and action contract. Immutable revision
+`591e22e582e920cbb4fdfac1a45365e81088bd06` passed local staging, guarded
+replacement, remote inventory, clean-room download, and checksum validation.
+Its machine-readable `asset_manifest.json` is authoritative for filenames,
+tensor roles, sizes, SHA-256 values, and compatibility metadata. The
+source-tree manifest does not duplicate that model-asset index.

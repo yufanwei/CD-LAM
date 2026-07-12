@@ -17,7 +17,7 @@ ASSET_MANIFEST = "asset_manifest.json"
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 RELEASE_ID = "cd-lam-2b-three-entry"
 RELEASE_SCOPE = "inference_evaluation"
-DEFAULT_REVISION = os.environ.get("CDLAM_HF_REVISION")
+PUBLISHED_REVISION = "591e22e582e920cbb4fdfac1a45365e81088bd06"
 EXPECTED_MAIN_ASSETS = {
     "lam": ("models/lam/model.pt", "stage1", "cdlam.stage1.inference"),
     "pretrain": (
@@ -70,8 +70,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--repo-id", default="yufanwei/CD-LAM")
     parser.add_argument(
         "--revision",
-        default=DEFAULT_REVISION,
-        help="Immutable 40-character HF commit; defaults to CDLAM_HF_REVISION.",
+        default=os.environ.get("CDLAM_HF_REVISION", PUBLISHED_REVISION),
+        help=(
+            "Immutable 40-character HF commit; defaults to CDLAM_HF_REVISION "
+            "or the published compact release."
+        ),
     )
     parser.add_argument("--local-dir", type=Path, default=PROJECT_ROOT / "artifacts")
     parser.add_argument(

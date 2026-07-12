@@ -129,10 +129,10 @@ runtime profile. The portable
 [`pipeline_100h_14b.yaml`](../configs/pipeline_100h_14b.yaml) remain protocol
 and custom-backbone planning templates; the bundled real wrapper is 2B-only.
 
-The locally verified compact Hugging Face snapshot prepares three main
-tensor-exact 2B research entries; its LAM/pretrain pair and separate 100h
-posttrain entry must not be treated as one direct lineage. Publication to an
-immutable Hugging Face revision is still pending.
+The compact Hugging Face snapshot at immutable revision
+`591e22e582e920cbb4fdfac1a45365e81088bd06` publishes three main tensor-exact
+2B research entries; its LAM/pretrain pair and separate 100h posttrain entry
+must not be treated as one direct lineage.
 The source release provides typed planners, an optimizer-based CPU integration
 backend, pinned 2B launch wrappers, and a manifest-checked integration overlay.
 The runtime fails closed while the matching base model, data, or other required
