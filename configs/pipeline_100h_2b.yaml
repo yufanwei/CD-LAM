@@ -1,0 +1,92 @@
+schema_version: 1
+name: cd_lam_100h_2b
+model_scale: 2B
+
+paths:
+  project_root: ..
+  data_root: data
+  artifact_root: artifacts
+  output_root: outputs/100h_2b
+  # Required assets are deliberately unset until provided by the user or by a
+  # versioned Hugging Face manifest. Do not infer checkpoint filenames.
+  unlabeled_manifest: null
+  robot_action_manifest: null
+  base_acwm: null
+  lam_init: null
+  stage1_lam: null
+  stage2_acwm: null
+  bridge_bundle: null
+
+runtime:
+  seed: 42
+  device: cuda
+
+# Production integrations implement the public StageAdapter interface. Keep
+# these null until a pinned external integration is installed.
+adapters:
+  stage1: null
+  stage2: null
+  bridge: null
+  stage3: null
+
+stage1:
+  name: lam_debiased_finetuning
+  data_tier_hours: 100
+  optimizer_steps: 1000
+  per_gpu_batch_size: 32
+  latent_dim: 32
+  objectives:
+    embodiment_centric_reconstruction:
+      enabled: true
+      mask_backend: sam3
+    action_centric_contrastive:
+      enabled: true
+      primitive_classes: 12
+    latent_space_calibration:
+      enabled: true
+      free_bit_kl: true
+      zero_transition: true
+
+stage2:
+  name: acwm_debiased_finetuning
+  optimizer_steps: 2000
+  per_gpu_batch_size: 12
+  condition: debiased_latent_action
+  latent_dim: 32
+  training_scope: D
+  resume:
+    checkpoint: null
+    steps: null
+
+bridge_training:
+  optimizer_steps: 1000
+  batch_size: 64
+  action_dim: 22
+  latent_dim: 32
+  # Raw adjacent action differences at a four-source-frame cadence. A
+  # Stage-3 adapter must undo loader min-max/block-anchor coordinates before
+  # invoking a bridge trained with this contract.
+  action_transform_id: agibot_alpha.raw_adjacent_stride4
+  source_stride: 4
+
+stage3:
+  name: robot_action_adaptation
+  optimizer_steps: 3000
+  batch_size: 11
+  action_dim: 22
+  latent_dim: 32
+  action_transform_id: agibot_alpha.raw_adjacent_stride4
+  source_stride: 4
+  working_directory: null
+  bridge:
+    type: mlp
+    required_bundle_fields:
+      - g_state
+      - action_mean
+      - action_std
+      - zm
+      - zsd
+      - latent_dim
+
+evaluation:
+  config: configs/eval_paper.yaml

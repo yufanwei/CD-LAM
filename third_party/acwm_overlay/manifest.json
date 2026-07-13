@@ -1,0 +1,337 @@
+{
+  "base_commit": "02f119b759d5c7f84a399fdeea3c6e82e7ed6cff",
+  "base_license": "Apache-2.0",
+  "base_repository": "https://github.com/NVIDIA/DreamDojo.git",
+  "overlay_license": "Apache-2.0",
+  "overlays": [
+    {
+      "bytes": 67,
+      "operation": "added",
+      "path": "cdlam_integration/__init__.py",
+      "sha256": "0609231fadf3212e0850b65a6451e719fd6060d41adba2b7fd147d664d658f34"
+    },
+    {
+      "bytes": 42,
+      "operation": "added",
+      "path": "cdlam_integration/bridge/__init__.py",
+      "sha256": "bbc2bc82659ff6f83f1ba2bdde60e4ce4d2a2304e53728204db405d2fd16cf7f"
+    },
+    {
+      "bytes": 6864,
+      "operation": "added",
+      "path": "cdlam_integration/bridge/decoding.py",
+      "sha256": "026beaa109ed64e49c79cf551dd51dfd4ce851cb8816bb14648d3c158bd71af5"
+    },
+    {
+      "bytes": 3634,
+      "operation": "added",
+      "path": "cdlam_integration/bridge/encoder.py",
+      "sha256": "e4cc10b0fea5fde7f9237d571ac3708d02984d6af8bae81b1c7ba2af8703a72c"
+    },
+    {
+      "bytes": 25590,
+      "operation": "added",
+      "path": "cdlam_integration/bridge/train.py",
+      "sha256": "e938c71e164b9979c437bc19ae6469d4d2c0f9b1913359f40c680e1f5eb77a4b"
+    },
+    {
+      "bytes": 3774,
+      "operation": "added",
+      "path": "cdlam_integration/bridge/trunk.py",
+      "sha256": "2cc56956751b1a44a0edfd6613ccf41e8ef387b021e38256d282d202eaac3531"
+    },
+    {
+      "bytes": 56,
+      "operation": "added",
+      "path": "cdlam_integration/lam/__init__.py",
+      "sha256": "b7dd6252a136c8c360146a34cf12dabf2bb072cd5314ab5845efee5d54615765"
+    },
+    {
+      "bytes": 15475,
+      "operation": "added",
+      "path": "cdlam_integration/lam/contrastive.py",
+      "sha256": "14a3f39bbc97354b9e8f713c4f92d6ba3c97ca62a5ce4c224915197605ccf314"
+    },
+    {
+      "bytes": 27356,
+      "operation": "added",
+      "path": "cdlam_integration/lam/contrastive_extensions.py",
+      "sha256": "39b1ce27864c41489cf663be5da8e243d714e74e055bbaae622c019f5122b9d3"
+    },
+    {
+      "bytes": 21189,
+      "operation": "added",
+      "path": "cdlam_integration/lam/data.py",
+      "sha256": "997697e5e2d07f349637795a1dc12c254415b3220451be79e8cc5a5b5a453978"
+    },
+    {
+      "bytes": 47208,
+      "operation": "added",
+      "path": "cdlam_integration/lam/distributed_helpers.py",
+      "sha256": "0595bacf48860d6dd97556318c3b792e1f70afd04dc2e6b6d3732a677a958f37"
+    },
+    {
+      "bytes": 5691,
+      "operation": "added",
+      "path": "cdlam_integration/lam/encoder.py",
+      "sha256": "91041c06171e95af9fef3de38f4646c61d3e05242f1966cf238dfc622ae8895c"
+    },
+    {
+      "bytes": 22739,
+      "operation": "added",
+      "path": "cdlam_integration/lam/eval.py",
+      "sha256": "70e87e2d8f62cfe0d66a23d20d81a4e66b444bc123343e4350eab883994498fc"
+    },
+    {
+      "bytes": 11173,
+      "operation": "added",
+      "path": "cdlam_integration/lam/eval_guardrails.py",
+      "sha256": "f57489592d1b6597cdd8201aedfc5811e2e939d0de0f343b64f09ce0069192fc"
+    },
+    {
+      "bytes": 15352,
+      "operation": "added",
+      "path": "cdlam_integration/lam/eval_metrics.py",
+      "sha256": "c3ea05b39101ec45cde97c36be97a3ff887c0b4811f1bc34ca10d4d02b55282c"
+    },
+    {
+      "bytes": 14968,
+      "operation": "added",
+      "path": "cdlam_integration/lam/eval_protocol.py",
+      "sha256": "13e4a42c22a7d33479625db68616b9dcca9838dd38584d55839f39438f385650"
+    },
+    {
+      "bytes": 19710,
+      "operation": "added",
+      "path": "cdlam_integration/lam/latent_losses.py",
+      "sha256": "42b95d3d8856ec2c3bbac096387905cf0742691ca280f45915acf278b1e33ac3"
+    },
+    {
+      "bytes": 8554,
+      "operation": "added",
+      "path": "cdlam_integration/lam/mask_adapter.py",
+      "sha256": "5f2042200b74cdadcb3ceec34ee5424d93932428810f2a91f97eec77e9b26acd"
+    },
+    {
+      "bytes": 4214,
+      "operation": "added",
+      "path": "cdlam_integration/lam/masks.py",
+      "sha256": "4b39b941f9b6342bc7ba7d54e90a55ae5bc8a01f9c9e89608b5c0a5e633cae65"
+    },
+    {
+      "bytes": 21003,
+      "operation": "added",
+      "path": "cdlam_integration/lam/model_loader.py",
+      "sha256": "0dfb6f440256aac3c1df7ebd746aa27df751e42ad847f2b7dbe9c80013fa4ea0"
+    },
+    {
+      "bytes": 5986,
+      "operation": "added",
+      "path": "cdlam_integration/lam/model_ops.py",
+      "sha256": "daee1375c115ef75e1aad640339fd395a0de2a4bc154f1edc6ac173278bf12ce"
+    },
+    {
+      "bytes": 47510,
+      "operation": "added",
+      "path": "cdlam_integration/lam/optimizer_helpers.py",
+      "sha256": "e258a4fd7a1b73ec35e65db1bdf9403f86f3aae568b234cd55057f10e1f0e36d"
+    },
+    {
+      "bytes": 25730,
+      "operation": "added",
+      "path": "cdlam_integration/lam/preprocess.py",
+      "sha256": "027cf07f844e5cd51511df9147078c73d4daf3353dac77fdd16ad00e8ebf9576"
+    },
+    {
+      "bytes": 3961,
+      "operation": "added",
+      "path": "cdlam_integration/lam/reconstruction.py",
+      "sha256": "a25106e9b87c30a3476581d83821e6ea1bb4d5b70d2582452ddabebe1ae045c4"
+    },
+    {
+      "bytes": 20203,
+      "operation": "added",
+      "path": "cdlam_integration/lam/residual_adapter.py",
+      "sha256": "c41743d202a7d6064a3ea3440a21445ea5b0f1167f7d0c20f7d2acbb67ec6ec7"
+    },
+    {
+      "bytes": 7275,
+      "operation": "added",
+      "path": "cdlam_integration/lam/sampling.py",
+      "sha256": "a6afe12e16592c739180943d1daecf08423144d160a0c055a3f377648b19c28c"
+    },
+    {
+      "bytes": 95859,
+      "operation": "added",
+      "path": "cdlam_integration/lam/train.py",
+      "sha256": "da356c7eab8f6d9152480144ba0d4bf239592bce039cc5ba2980f80e4585e662"
+    },
+    {
+      "bytes": 9397,
+      "operation": "added",
+      "path": "cdlam_integration/lam/transforms.py",
+      "sha256": "07de2a3ee88b4a695284767e2a30ddcd7e8ae5a575ab452ce33195cbda543ba8"
+    },
+    {
+      "bytes": 45,
+      "operation": "added",
+      "path": "cdlam_integration/stage3/__init__.py",
+      "sha256": "bac0b35db49dc4dee57d99c02dbaec8ff952e70c5c1fae188f8c72f92fd436a5"
+    },
+    {
+      "bytes": 24062,
+      "operation": "added",
+      "path": "cdlam_integration/stage3/support.py",
+      "sha256": "f56f006886f00f24f4c72f95072b1dda18d1cae0ab30438304908013c2a83cba"
+    },
+    {
+      "bytes": 20689,
+      "operation": "added",
+      "path": "cdlam_integration/stage3/train.py",
+      "sha256": "247a998c04a53e79e8f46d75445394c49342b24d41f4039d6e81c743bb172e6b"
+    },
+    {
+      "bytes": 58,
+      "operation": "added",
+      "path": "cdlam_integration/world_model/__init__.py",
+      "sha256": "e8ba3c926106a138a602a9419be8562d63be3bfe15570fb2d1b7423771a8f71c"
+    },
+    {
+      "bytes": 6665,
+      "operation": "added",
+      "path": "cdlam_integration/world_model/model_loader.py",
+      "sha256": "41179d9af88681c1275fcdb9d5cdfb952d7b23f434783a2dfcd9a1b6dc0265dd"
+    },
+    {
+      "bytes": 8878,
+      "operation": "added",
+      "path": "cdlam_integration/world_model/monitor.py",
+      "sha256": "36233373979f5f1ba893b5555db948dfcd2dc270b77a21614c5161c62fb687a5"
+    },
+    {
+      "bytes": 6945,
+      "operation": "added",
+      "path": "cdlam_integration/world_model/preprocess.py",
+      "sha256": "db4321c8e1489a2c00fb9c2d2043e9e501636703709d5ddde897ebf04b1e632c"
+    },
+    {
+      "bytes": 2522,
+      "operation": "added",
+      "path": "cdlam_integration/world_model/registry.py",
+      "sha256": "7592d240db2d5a1f130e86b3c35e0c2970dba8344373acfb72e34fed505041e1"
+    },
+    {
+      "bytes": 16288,
+      "operation": "added",
+      "path": "cdlam_integration/world_model/scope.py",
+      "sha256": "d89327f35343960c9059a3f7f371d0d4bc54f0d88158d503499d8f8161850cd2"
+    },
+    {
+      "bytes": 91498,
+      "operation": "added",
+      "path": "cdlam_integration/world_model/train.py",
+      "sha256": "ffd9bfee80d216de6408a092e7d870915f7fc1335adc97b563ea9837c09d4bdd"
+    },
+    {
+      "bytes": 4546,
+      "operation": "modified",
+      "path": "cosmos_predict2/_src/predict2/action/configs/action_conditioned/config.py",
+      "sha256": "a64af0d0d5c1070090dc0a009db0c26cf3a5951ebe54b5fd8866fcbd81d84c20",
+      "base_sha256": "aef2f0561b4baf32ac477f28d1f75c0efddb72c12fffd1dafe5c471300223efc"
+    },
+    {
+      "bytes": 34604,
+      "operation": "modified",
+      "path": "cosmos_predict2/_src/predict2/action/configs/action_conditioned/experiment/exp_2B_action_conditioned_rectify_flow_gr00t.py",
+      "sha256": "97cfd3f70fdadb1fda48608ab9a970e81b4f43ceb6e4fe4173f4202ad9116830",
+      "base_sha256": "4a8ddb4d107ed3c53161786354bbf43094548535fd3f95dbacb613bb1f2ff05c"
+    },
+    {
+      "bytes": 87894,
+      "operation": "modified",
+      "path": "cosmos_predict2/_src/predict2/networks/minimal_v4_dit.py",
+      "sha256": "4ce91689f38666a953aa74a71d526fb425a1de31250921d724532d7b4a3627c8",
+      "base_sha256": "95228b4644f35f0a7b46e2a5d0b3025acd2fd4c84d78a57fc4ac7896a0295df3"
+    },
+    {
+      "bytes": 12932,
+      "operation": "modified",
+      "path": "cosmos_predict2/experiments/base/action.py",
+      "sha256": "b3607ae9d214455a9271c7024ab31e4eeff379cd5df3f68eea90f725b7351403",
+      "base_sha256": "1ea35d26198824e184cf244c609c669c4c4866c41df8e753f3eaaedc88de9b25"
+    },
+    {
+      "bytes": 54157,
+      "operation": "modified",
+      "path": "groot_dreams/data/dataset.py",
+      "sha256": "7d25d6d0cbb1a09902c8b2d7a825bd3db224ff47c89e4a6d21c23389870461a5",
+      "base_sha256": "b8f149161cbaac5ac96a4b78009ea1fc6bcf59007f886ad557de0b5563533cca"
+    },
+    {
+      "bytes": 28036,
+      "operation": "modified",
+      "path": "groot_dreams/data/dataset_mano.py",
+      "sha256": "fa59bb828e5786aad294b64e0d3648fcf9d47f8224f947299279897749d025ba",
+      "base_sha256": "235419825d1d7b08d9013fd22a063d9942df49e27ae93af0ef727e6089feb0b7"
+    },
+    {
+      "bytes": 6375,
+      "operation": "modified",
+      "path": "groot_dreams/data/dataset_video.py",
+      "sha256": "591239011e4ccf1e6cd4e9f689305ff009864910bf33b42e02e3f9f7b39e7898",
+      "base_sha256": "5d9477c632217d20d50fe21893fb7b0dd1d47f9117b375e7fbdab1fd6c217617"
+    },
+    {
+      "bytes": 139,
+      "operation": "modified",
+      "path": "groot_dreams/data/embodiment_tags.py",
+      "sha256": "210558d783efe6a626fc2b2e966bf8c58d1480158e3f28bbeb2a7b5050688237",
+      "base_sha256": "2268bd14b1b9c251c4cab6748a6439288ed56b505efb5678b586d3caf2947160"
+    },
+    {
+      "bytes": 11661,
+      "operation": "modified",
+      "path": "groot_dreams/dataloader.py",
+      "sha256": "06ef2eef4486d80e0af4fb544296915ab0f3b0f98613cb98b0680caedabfff22",
+      "base_sha256": "9222799ebe59d8752199827f1bb0d90e5b8bc4e6193bade477bf2bce835517da"
+    },
+    {
+      "bytes": 9818,
+      "operation": "modified",
+      "path": "groot_dreams/groot_configs.py",
+      "sha256": "49a4492848846232efff00334046712ac0bfd06baf1d95b9f49cbce3db475fdc",
+      "base_sha256": "d5635877da03ddafa109dd3b35d8d6f9af1686552705499ca2c4a1530a402ad3"
+    },
+    {
+      "bytes": 7547,
+      "operation": "modified",
+      "path": "groot_dreams/utils/video.py",
+      "sha256": "95958cde4a182a8322b4210324c225c0564c9be0aaf590ad11ea223e775a935a",
+      "base_sha256": "d7df452902dd9a2b5be3c173262dd8cb6a7f20e844f1d65cf6a0180d3f8e3a8e"
+    }
+  ],
+  "publication_status": "bundled",
+  "required_runtime_paths": [
+    "external/lam/model.py",
+    "cdlam_integration/lam/train.py",
+    "cdlam_integration/lam/transforms.py",
+    "cdlam_integration/bridge/train.py",
+    "cdlam_integration/world_model/train.py",
+    "cdlam_integration/stage3/train.py",
+    "groot_dreams/dataloader.py",
+    "shared_meta/AgiBot_modality.json",
+    "shared_meta/AgiBot_stats.json"
+  ],
+  "runtime_id": "cdlam-acwm-runtime",
+  "runtime_tree": {
+    "algorithm": "sha256-path-size",
+    "files": 725,
+    "bytes": 28249808,
+    "sha256": "a88ebe7fd3eb48bd52ac51ac0fbfe279fa6eb2f246467c58f22b824222859e48"
+  },
+  "schema_version": 1,
+  "validators": [
+    "internal/runtime/validate_eval_source.py",
+    "internal/runtime/validate_stage2_source.py"
+  ]
+}

@@ -1,0 +1,55 @@
+schema_version: 1
+name: cd_lam_paper_protocol
+
+stage1_lam_audit:
+  unit: encoder_transition
+  before_world_model_rollout: true
+  diagnostics:
+    - zero_transition_relative_norm
+    - zero_transition_absolute_latent_norm
+    - camera_shift_horizontal_relative_norm
+    - camera_shift_vertical_relative_norm
+    - shortcut_leakage
+    - same_primitive_cross_episode_cosine_preservation
+
+stage2_latent_action_rollout:
+  dataset: EgoDex
+  split: held_out
+  clips: 300
+  modes:
+    - latent_action_from_source_transition
+    - target_latent_transfer_fixed_source_context
+  metrics:
+    - fdce
+    - psnr
+    - ssim
+    - lpips
+
+stage3_robot_action_rollout:
+  dataset: AgiBot
+  split: distinct_episodes
+  clips: 300
+  modes:
+    - recorded_robot_action
+    - zero_action_static_reference
+    - target_action_transfer_fixed_source_context
+  metrics:
+    - fdce_mean
+    - fdce_median
+    - psnr
+    - ssim
+    - lpips
+
+fdce:
+  units: pixels_at_evaluation_resolution
+  lower_is_better: true
+  max_valid_foreground_anchors: 16
+  foreground_backend: sam3
+  tracking_backend: cowtracker
+  anchor_mask: eroded_foreground
+  discard_low_visibility_tracks: true
+  aggregation: symmetric_chamfer_over_displacement_tracks
+  zero_action_reference: initial_frame_held_fixed
+  warnings:
+    - zero_action_fdce_is_not_comparable_to_rollout_fdce
+    - record_resolution_dependency_versions_and_valid_track_counts

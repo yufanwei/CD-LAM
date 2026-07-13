@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "contract_id": "agibot-alpha-22d-raw-adjacent-stride4",
+  "embodiment": "agibot",
+  "action_dim": 22,
+  "action_tokens": 12,
+  "block_size": 4,
+  "source_stride": 4,
+  "loader_representation": "minmax_normalized_block_anchor_cumulative_delta",
+  "bridge_representation": "raw_adjacent_stride_delta",
+  "stats_relative_path": "shared_meta/AgiBot_stats.json",
+  "stats_sha256": "ea3999b4141236cf41c702b6c618bc6ab9ee696a80f154eaa91efbbf88fbd72b",
+  "modality_relative_path": "shared_meta/AgiBot_modality.json",
+  "modality_sha256": "29fd7cec495ddeb0baa8e6d13c3d73a259a1bb2447b7afb5fe2390f1e223a4ed",
+  "metadata_source_repository": "https://github.com/NVIDIA/DreamDojo.git",
+  "metadata_source_revision": "02f119b759d5c7f84a399fdeea3c6e82e7ed6cff",
+  "legacy_bridge_sha256_by_scale_family": {
+    "100h": "346710032ca50ba18876d2727981b18db60cb9e7bea1d6efdb10056bb7232fdd"
+  },
+  "layout": [
+    {"name": "left_arm_joint_position", "start": 0, "end": 7},
+    {"name": "right_arm_joint_position", "start": 7, "end": 14},
+    {"name": "left_effector_position", "start": 14, "end": 15},
+    {"name": "right_effector_position", "start": 15, "end": 16},
+    {"name": "head_position", "start": 16, "end": 18},
+    {"name": "waist_pitch", "start": 18, "end": 19},
+    {"name": "waist_lift", "start": 19, "end": 20},
+    {"name": "robot_velocity", "start": 20, "end": 22}
+  ]
+}

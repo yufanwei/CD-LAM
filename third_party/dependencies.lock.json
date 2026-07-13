@@ -1,0 +1,78 @@
+{
+  "schema_version": 1,
+  "dependencies": [
+    {
+      "name": "ACWM base implementation",
+      "repository": "https://github.com/NVIDIA/DreamDojo.git",
+      "revision": "02f119b759d5c7f84a399fdeea3c6e82e7ed6cff",
+      "license": "Apache-2.0",
+      "bundled": false,
+      "fetch_mode": "source-script",
+      "patches": [
+        "third_party/patches/acwm_timestamp_nearest_neighbor.patch"
+      ],
+      "patch_application": "manual-after-git-apply-check",
+      "source_validator": "internal/runtime/validate_eval_source.py",
+      "runtime_overlay_required": true,
+      "runtime_overlay_bundled": true,
+      "runtime_overlay_manifest": "third_party/acwm_overlay/manifest.json",
+      "runtime_overlay_files": 49,
+      "runtime_overlay_manifest_sha256": "d782fc5541c01680cf24e481a2211466d9bdc16c2955288951e1f4d1e4b366d1",
+      "integration_note": "The fetch-base command checks out this exact upstream revision, verifies every bundled overlay file and modified-base hash, and stages a separate ACWM runtime under .deps/acwm-runtime.",
+      "required_for": [
+        "full 2B/14B training",
+        "full rollout inference"
+      ]
+    },
+    {
+      "name": "Cosmos video tokenizer",
+      "repository": "https://huggingface.co/nvidia/Cosmos-Predict2.5-2B",
+      "revision": "6787e176dce74a101d922174a95dba29fa5f0c55",
+      "license": "NVIDIA Open Model License",
+      "bundled": false,
+      "fetch_mode": "manual",
+      "required_for": [
+        "full 2B/14B training",
+        "full rollout inference"
+      ]
+    },
+    {
+      "name": "Cosmos text encoder",
+      "repository": "https://huggingface.co/nvidia/Cosmos-Reason1-7B",
+      "revision": "3210bec0495fdc7a8d3dbb8d58da5711eab4b423",
+      "license": "NVIDIA Open Model License",
+      "bundled": false,
+      "fetch_mode": "manual",
+      "required_for": [
+        "full 2B/14B training",
+        "full rollout inference"
+      ]
+    },
+    {
+      "name": "SAM3",
+      "repository": "https://github.com/facebookresearch/sam3.git",
+      "revision": "8e451d5eb43c817b64ae7577fb7b9ae223db88a9",
+      "license": "SAM License",
+      "bundled": false,
+      "fetch_mode": "source-script",
+      "required_for": [
+        "Stage-1 foreground masks",
+        "FDCE evaluation"
+      ]
+    },
+    {
+      "name": "CoWTracker",
+      "repository": "https://github.com/facebookresearch/cowtracker.git",
+      "revision": "1454f20045d3b514e5b8417907152677f3dba621",
+      "license": "FAIR Noncommercial Research License",
+      "bundled": false,
+      "fetch_mode": "source-script",
+      "patches": [
+        "third_party/patches/cowtracker_flash_attention_compat.patch"
+      ],
+      "required_for": [
+        "FDCE evaluation"
+      ]
+    }
+  ]
+}

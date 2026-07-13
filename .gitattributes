@@ -1,0 +1,11 @@
+* text=auto eol=lf
+*.sh text eol=lf
+*.py text eol=lf
+*.json text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+*.md text eol=lf
+*.pdf binary
+*.png binary
+third_party/acwm_overlay/** -whitespace
+third_party/patches/*.patch -whitespace

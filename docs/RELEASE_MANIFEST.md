@@ -1,0 +1,64 @@
+# Release manifest
+
+This manifest describes the source release. It intentionally excludes model
+weights, datasets, generated rollouts, metric caches, and third-party model
+weights.
+
+```text
+CD-LAM/
+├── .github/        CI and contributing guide
+├── configs/        portable pipeline and evaluation templates
+├── docs/           method docs, model card, examples, and paper fixtures
+├── internal/       release tooling and self-contained data/runtime support
+├── scripts/
+├── src/
+├── tests/          tests plus fixtures/ portable test-set metadata
+├── third_party/
+├── README.md
+├── setup.sh
+├── run.sh
+├── LICENSE
+├── NOTICE
+├── Makefile
+├── pyproject.toml
+└── requirements.lock
+```
+
+## Included
+
+- PyTorch CD-LAM loss, action-transform, and bridge primitives.
+- Typed Stage-1/2/bridge/Stage-3 planners and concrete 2B launch wrappers.
+- A small source-only ACWM integration overlay pinned by manifest to one
+  upstream source revision, plus a complete 737-file staged-tree digest.
+- Deterministic host-side training smoke with checkpoint, resume, and lineage
+  validation.
+- AgiBot official-episode materialization, command-preserving conversion,
+  split-safe Stage-1/2 manifests, and bridge-cache generation, plus bounded
+  official-format EgoDex preparation.
+- Portable, relative-path configuration examples for the 100-hour main tier.
+- Pinned one-command 2B GPU setup into the single `.venv`, including live driver
+  validation, a real CUDA optimizer smoke, asset-contract gates, and a
+  hash-bound FDCE track scorer.
+- Machine-readable Tables I–V copied from the manuscript, with protocol
+  qualifiers.
+- Documentation of the optional SAM3 and CoWTracker integrations.
+
+## Not included
+
+- CD-LAM or backbone checkpoints.
+- Training or evaluation datasets.
+- The complete NVIDIA ACWM source tree; the fetch command stages it outside Git
+  after explicit license acknowledgement.
+- SAM3 or CoWTracker source code and weights.
+- Private experiment reports, raw rollout videos, caches, or machine-specific
+  launch settings.
+
+The compact [Hugging Face repository](https://huggingface.co/yufanwei/CD-LAM)
+contains exactly three main 2B research entries plus the posttraining bridge
+and action contract. Immutable revision
+`2a02c07f4f5d1b731e0cf4e4fa1b9767ed592c1f` passed local staging, guarded
+replacement, exact 10-file remote inventory, manifest, size, and LFS SHA-256
+validation.
+Its machine-readable `asset_manifest.json` is authoritative for filenames,
+tensor roles, sizes, SHA-256 values, and compatibility metadata. The
+source-tree manifest does not duplicate that model-asset index.
