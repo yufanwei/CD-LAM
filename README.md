@@ -1,6 +1,6 @@
 <div align="center">
-  <h1>CD-LAM</h1>
-  <p><strong>Causally Debiased Latent Action Model for Embodied Action Conditioned World Models</strong></p>
+  <h1>CD-LAM: Causally Debiased Latent Action Model for Embodied Action Conditioned World Models
+</h1>
   <p>
     <a href="https://github.com/yufanwei/CD-LAM/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/yufanwei/CD-LAM/actions/workflows/ci.yml/badge.svg"></a>
     <img alt="Python 3.10" src="https://img.shields.io/badge/python-3.10-3776AB">
